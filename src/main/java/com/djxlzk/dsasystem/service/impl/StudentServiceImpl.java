@@ -41,7 +41,7 @@ public class StudentServiceImpl implements StudentService {
         // 创建学员
         Student student = new Student();
         student.setMobile(registerDTO.getMobile());
-        student.setPassword(PasswordUtil.encode(registerDTO.getPassword()));
+        student.setPassword(PasswordUtil.encrypt(registerDTO.getPassword()));
         student.setUserName(registerDTO.getUserName());
         student.setCreateTime(LocalDateTime.now());
         student.setStatus(1);
@@ -64,7 +64,7 @@ public class StudentServiceImpl implements StudentService {
             return ResultDTO.error(400, "账号已禁用");
         }
         // 验证密码
-        if (!PasswordUtil.matches(loginDTO.getPassword(), student.getPassword())) {
+        if (!PasswordUtil.match(loginDTO.getPassword(), student.getPassword())) {
             return ResultDTO.error(400, "密码错误，剩余4次机会");
         }
         // 生成token
@@ -84,7 +84,7 @@ public class StudentServiceImpl implements StudentService {
             return ResultDTO.error(400, "学员不存在");
         }
         // 验证旧密码
-        if (!PasswordUtil.matches(oldPassword, student.getPassword())) {
+        if (!PasswordUtil.match(oldPassword, student.getPassword())) {
             return ResultDTO.error(400, "旧密码错误");
         }
         // 验证新密码格式
@@ -92,7 +92,7 @@ public class StudentServiceImpl implements StudentService {
             return ResultDTO.error(400, "密码长度需8-20位，包含字母和数字");
         }
         // 更新密码
-        student.setPassword(PasswordUtil.encode(newPassword));
+        student.setPassword(PasswordUtil.encrypt(newPassword));
         studentMapper.updateById(student);
         return ResultDTO.success("密码修改成功");
     }

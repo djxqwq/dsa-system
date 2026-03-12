@@ -24,8 +24,8 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 Claims claims = JwtUtil.parseToken(token);
                 Long userId = (Long) claims.get("userId");
-                String userType = (String) claims.get("userType");
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userId, userType);
+                String role = (String) claims.get("role");
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userId, role);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
                 // token无效，不做处理
