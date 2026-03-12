@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>驾校练车预约管理系统测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .tab {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab button {
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 3px solid transparent;
+        }
+        .tab button.active {
+            background-color: white;
+            border-bottom-color: #007bff;
+            color: #007bff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button[type="button"] {
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button[type="button"]:hover {
+            background-color: #0069d9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>驾校练车预约管理系统测试</h1>
+        
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'register')">学员注册</button>
+            <button class="tablinks" onclick="openTab(event, 'studentLogin')">学员登录</button>
+            <button class="tablinks" onclick="openTab(event, 'coachLogin')">教练登录</button>
+        </div>
+        
+        <div id="register" class="tab-content active">
+            <h2>学员注册</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regMobile">手机号：</label>
+                    <input type="text" id="regMobile" value="13800138000">
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">密码：</label>
+                    <input type="password" id="regPassword" value="Aa123456">
+                </div>
+                <div class="form-group">
+                    <label for="regUserName">用户名：</label>
+                    <input type="text" id="regUserName" value="张三">
+                </div>
+                <button type="button" onclick="register()">注册</button>
+            </form>
+            <div id="registerResult" class="result"></div>
+        </div>
+        
+        <div id="studentLogin" class="tab-content">
+            <h2>学员登录</h2>
+            <form id="studentLoginForm">
+                <div class="form-group">
+                    <label for="stuMobile">手机号：</label>
+                    <input type="text" id="stuMobile" value="13800138000">
+                </div>
+                <div class="form-group">
+                    <label for="stuPassword">密码：</label>
+                    <input type="password" id="stuPassword" value="Aa123456">
+                </div>
+                <button type="button" onclick="studentLogin()">登录</button>
+            </form>
+            <div id="studentLoginResult" class="result"></div>
+        </div>
+        
+        <div id="coachLogin" class="tab-content">
+            <h2>教练登录</h2>
+            <form id="coachLoginForm">
+                <div class="form-group">
+                    <label for="coachMobile">手机号：</label>
+                    <input type="text" id="coachMobile" value="13900139000">
+                </div>
+                <div class="form-group">
+                    <label for="coachPassword">密码：</label>
+                    <input type="password" id="coachPassword" value="Aa123456">
+                </div>
+                <button type="button" onclick="coachLogin()">登录</button>
+            </form>
+            <div id="coachLoginResult" class="result"></div>
+        </div>
+    </div>
+    
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        function register() {
+            const mobile = document.getElementById('regMobile').value;
+            const password = document.getElementById('regPassword').value;
+            const userName = document.getElementById('regUserName').value;
+            
+            fetch('http://localhost:8080/api/user/student/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mobile,
+                    password,
+                    userName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('registerResult').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('registerResult').innerText = '错误：' + error;
+            });
+        }
+        
+        function studentLogin() {
+            const mobile = document.getElementById('stuMobile').value;
+            const password = document.getElementById('stuPassword').value;
+            
+            fetch('http://localhost:8080/api/user/student/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mobile,
+                    password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('studentLoginResult').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('studentLoginResult').innerText = '错误：' + error;
+            });
+        }
+        
+        function coachLogin() {
+            const mobile = document.getElementById('coachMobile').value;
+            const password = document.getElementById('coachPassword').value;
+            
+            fetch('http://localhost:8080/api/user/coach/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mobile,
+                    password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('coachLoginResult').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('coachLoginResult').innerText = '错误：' + error;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -20,13 +20,12 @@ public class JwtConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeRequests(authorize -> authorize
-                .requestMatchers("/api/user/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeRequests(authorize -> authorize
+                        .antMatchers("/api/user/**").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
