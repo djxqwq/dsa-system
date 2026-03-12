@@ -33,9 +33,7 @@ public class StudentServiceImpl implements StudentService {
             return ResultDTO.error(400, "密码长度需8-20位，包含字母和数字");
         }
         // 检查手机号是否已注册
-        QueryWrapper<Student> wrapper = new QueryWrapper<>();
-        wrapper.eq("mobile", registerDTO.getMobile());
-        if (studentMapper.selectOne(wrapper) != null) {
+        if (studentMapper.selectByMobile(registerDTO.getMobile()) != null) {
             return ResultDTO.error(400, "手机号已注册");
         }
         // 创建学员
@@ -53,9 +51,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public ResultDTO<?> login(LoginDTO loginDTO) {
         // 查找学员
-        QueryWrapper<Student> wrapper = new QueryWrapper<>();
-        wrapper.eq("mobile", loginDTO.getMobile());
-        Student student = studentMapper.selectOne(wrapper);
+        Student student = studentMapper.selectByMobile(loginDTO.getMobile());
         if (student == null) {
             return ResultDTO.error(400, "手机号未注册");
         }
