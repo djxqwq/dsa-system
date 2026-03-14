@@ -19,9 +19,19 @@
           <el-input v-model="form.password" placeholder="请输入密码" show-password clearable />
         </el-form-item>
 
+        <el-form-item label="验证码" prop="captchaCode">
+          <div class="captcha-row">
+            <el-input v-model="form.captchaCode" placeholder="请输入验证码" clearable />
+            <div class="captcha-box" @click="refreshCaptcha" title="点击刷新">
+              <img v-if="captchaImage" :src="captchaImage" alt="captcha" />
+              <div v-else class="captcha-loading">加载中</div>
+            </div>
+          </div>
+        </el-form-item>
+
         <div class="actions">
           <el-button type="primary" class="btn" @click="onLogin">登录</el-button>
-          <el-button text class="hint" @click="fillDemo">一键填充演示账号</el-button>
+          <el-button text class="hint" @click="goRegister">去注册</el-button>
         </div>
 
         <div class="tips">
@@ -37,10 +47,11 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
+import http from '../api/http'
 
 const router = useRouter()
 const route = useRoute()
@@ -52,7 +63,11 @@ const form = reactive({
   role: 'student',
   mobile: '',
   password: '',
+  captchaId: '',
+  captchaCode: '',
 })
+
+const captchaImage = ref('')
 
 const roleOptions = [
   { label: '学员', value: 'student' },
@@ -60,42 +75,108 @@ const roleOptions = [
   { label: '管理员', value: 'admin' },
 ]
 
+function validateMobile(rule, value, callback) {
+  if (!value) {
+    callback(new Error('请输入手机号'))
+    return
+  }
+  if (form.role !== 'admin' && !/^1\d{10}$/.test(value)) {
+    callback(new Error('手机号格式不正确'))
+    return
+  }
+  callback()
+}
+
 const rules = {
   role: [{ required: true, message: '请选择角色', trigger: 'change' }],
   mobile: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' },
+    { validator: validateMobile, trigger: 'blur' },
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, message: '密码至少6位', trigger: 'blur' },
   ],
+  captchaCode: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
 }
 
-function fillDemo() {
-  if (form.role === 'coach') {
-    form.mobile = '13900139000'
-  } else if (form.role === 'admin') {
-    form.mobile = '18800188000'
-  } else {
-    form.mobile = '13800138000'
+watch(
+  () => form.role,
+  () => {
+    formRef.value?.clearValidate?.(['mobile'])
+  },
+)
+
+function goRegister() {
+  router.replace({ name: 'register' })
+}
+
+async function refreshCaptcha() {
+  try {
+    const res = await http.get('/api/captcha/image')
+    if (res?.data?.code !== 200) {
+      ElMessage.error(res?.data?.msg || '获取验证码失败')
+      return
+    }
+    form.captchaId = res.data.data.captchaId
+    captchaImage.value = res.data.data.imageBase64
+    form.captchaCode = ''
+  } catch {
+    ElMessage.error('获取验证码失败')
   }
-  form.password = 'Aa123456'
 }
 
 async function onLogin() {
   await formRef.value?.validate()
 
-  auth.login({
-    token: `demo_${Date.now()}`,
-    role: form.role,
-    profile: {
-      name: form.role === 'student' ? '学员用户' : form.role === 'coach' ? '教练用户' : '管理员',
-      mobile: form.mobile,
-    },
-  })
+  const apiPath =
+    form.role === 'coach'
+      ? '/api/user/coach/login'
+      : form.role === 'admin'
+        ? '/api/user/admin/login'
+        : '/api/user/student/login'
 
-  ElMessage.success('登录成功')
+  try {
+    const res = await http.post(apiPath, {
+      mobile: form.mobile,
+      password: form.password,
+      captchaId: form.captchaId,
+      captchaCode: form.captchaCode,
+    })
+
+    if (res?.data?.code !== 200) {
+      ElMessage.error(res?.data?.msg || '登录失败')
+      await refreshCaptcha()
+      return
+    }
+
+    const data = res.data.data || {}
+    const token = data.token || ''
+    if (!token) {
+      ElMessage.error('登录失败：未返回token')
+      await refreshCaptcha()
+      return
+    }
+
+    auth.login({
+      token,
+      role: form.role,
+      profile: {
+        name:
+          form.role === 'student'
+            ? data.userName || '学员'
+            : form.role === 'coach'
+              ? data.name || '教练'
+              : data.name || '管理员',
+        mobile: form.mobile,
+      },
+    })
+
+    ElMessage.success('登录成功')
+  } catch {
+    ElMessage.error('登录失败')
+    await refreshCaptcha()
+    return
+  }
 
   const redirect = route.query.redirect
   if (typeof redirect === 'string' && redirect.startsWith('/')) {
@@ -104,6 +185,8 @@ async function onLogin() {
   }
   router.replace(auth.homePath)
 }
+
+onMounted(refreshCaptcha)
 </script>
 
 <style scoped>
@@ -173,6 +256,35 @@ async function onLogin() {
 
 .hint {
   color: rgba(255, 255, 255, 0.72);
+}
+
+.captcha-row {
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  gap: 10px;
+  align-items: center;
+}
+
+.captcha-box {
+  height: 40px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.captcha-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.captcha-loading {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
 }
 
 .tips {

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const LoginView = () => import('../views/LoginView.vue')
+const RegisterView = () => import('../views/RegisterView.vue')
 const MainLayout = () => import('../layouts/MainLayout.vue')
 
 const StudentProfile = () => import('../views/student/ProfileView.vue')
@@ -23,6 +24,7 @@ const AdminSettings = () => import('../views/admin/SettingsView.vue')
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
+  { path: '/register', name: 'register', component: RegisterView, meta: { public: true } },
   {
     path: '/app',
     component: MainLayout,

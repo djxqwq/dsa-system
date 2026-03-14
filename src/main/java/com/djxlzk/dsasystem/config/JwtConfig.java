@@ -24,6 +24,7 @@ public class JwtConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeRequests(authorize -> authorize
                         .antMatchers("/api/user/**").permitAll()
+                        .antMatchers("/api/captcha/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

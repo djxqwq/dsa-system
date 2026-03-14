@@ -7,6 +7,7 @@ import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.entity.Student;
 import com.djxlzk.dsasystem.mapper.StudentMapper;
 import com.djxlzk.dsasystem.service.StudentService;
+import com.djxlzk.dsasystem.util.CaptchaStore;
 import com.djxlzk.dsasystem.util.JwtUtil;
 import com.djxlzk.dsasystem.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public ResultDTO<?> register(RegisterDTO registerDTO) {
+        if (!CaptchaStore.verifyAndRemove(registerDTO.getCaptchaId(), registerDTO.getCaptchaCode())) {
+            return ResultDTO.error(400, "验证码错误或已过期");
+        }
         // 验证手机号格式
         if (!registerDTO.getMobile().matches("^1[3-9]\\d{9}$")) {
             return ResultDTO.error(400, "手机号格式错误");
@@ -50,6 +54,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public ResultDTO<?> login(LoginDTO loginDTO) {
+        if (!CaptchaStore.verifyAndRemove(loginDTO.getCaptchaId(), loginDTO.getCaptchaCode())) {
+            return ResultDTO.error(400, "验证码错误或已过期");
+        }
         // 查找学员
         Student student = studentMapper.selectByMobile(loginDTO.getMobile());
         if (student == null) {

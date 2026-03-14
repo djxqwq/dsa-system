@@ -23,12 +23,23 @@ public class PasswordUtil {
 
     /**
      * 验证密码是否匹配
+     * 支持明文密码和 BCrypt 哈希密码
      * 
      * @param rawPassword     原始密码
-     * @param encodedPassword 加密后的密码
+     * @param encodedPassword 存储的密码（可能是明文或哈希）
      * @return 是否匹配
      */
     public static boolean match(String rawPassword, String encodedPassword) {
-        return encoder.matches(rawPassword, encodedPassword);
+        if (encodedPassword == null) {
+            return false;
+        }
+        
+        // 如果是 BCrypt 哈希格式，使用加密验证
+        if (encodedPassword.startsWith("$2a$") || encodedPassword.startsWith("$2b$") || encodedPassword.startsWith("$2y$")) {
+            return encoder.matches(rawPassword, encodedPassword);
+        } else {
+            // 否则直接字符串比较（明文密码）
+            return rawPassword.equals(encodedPassword);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.djxlzk.dsasystem.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @TableName("student")
 public class Student {
+
     /**
      * 主键ID
      */
@@ -32,11 +34,13 @@ public class Student {
     /**
      * 用户名
      */
+    @TableField("user_name")
     private String userName;
 
     /**
      * 创建时间
      */
+    @TableField("create_time")
     private LocalDateTime createTime;
 
     /**
@@ -47,5 +51,6 @@ public class Student {
     /**
      * 爽约次数
      */
+    @TableField("no_show_count")
     private Integer noShowCount;
 }

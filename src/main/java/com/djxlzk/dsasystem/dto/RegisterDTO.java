@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class RegisterDTO {
+
     /**
      * 手机号（11位）
      */
@@ -27,4 +28,16 @@ public class RegisterDTO {
      */
     @NotBlank(message = "用户名不能为空")
     private String userName;
+
+    /**
+     * 验证码ID
+     */
+    @NotBlank(message = "验证码ID不能为空")
+    private String captchaId;
+
+    /**
+     * 验证码
+     */
+    @NotBlank(message = "验证码不能为空")
+    private String captchaCode;
 }

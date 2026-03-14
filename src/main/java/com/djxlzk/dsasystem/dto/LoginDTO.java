@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class LoginDTO {
+
     /**
      * 手机号（11位）
      */
@@ -21,4 +22,16 @@ public class LoginDTO {
      */
     @NotBlank(message = "密码不能为空")
     private String password;
+
+    /**
+     * 验证码ID
+     */
+    @NotBlank(message = "验证码ID不能为空")
+    private String captchaId;
+
+    /**
+     * 验证码
+     */
+    @NotBlank(message = "验证码不能为空")
+    private String captchaCode;
 }

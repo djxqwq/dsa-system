@@ -6,6 +6,7 @@ import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.entity.Coach;
 import com.djxlzk.dsasystem.mapper.CoachMapper;
 import com.djxlzk.dsasystem.service.CoachService;
+import com.djxlzk.dsasystem.util.CaptchaStore;
 import com.djxlzk.dsasystem.util.JwtUtil;
 import com.djxlzk.dsasystem.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,14 @@ public class CoachServiceImpl implements CoachService {
 
     @Override
     public ResultDTO<?> login(LoginDTO loginDTO) {
+        if (!CaptchaStore.verifyAndRemove(loginDTO.getCaptchaId(), loginDTO.getCaptchaCode())) {
+            return ResultDTO.error(400, "验证码错误或已过期");
+        }
         // 查找教练
         QueryWrapper<Coach> wrapper = new QueryWrapper<>();
         wrapper.eq("mobile", loginDTO.getMobile());
         Coach coach = coachMapper.selectOne(wrapper);
+
         if (coach == null) {
             return ResultDTO.error(400, "账号不存在");
         }

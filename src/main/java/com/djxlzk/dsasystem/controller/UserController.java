@@ -1,14 +1,17 @@
 package com.djxlzk.dsasystem.controller;
 
+import com.djxlzk.dsasystem.dto.AdminLoginDTO;
 import com.djxlzk.dsasystem.dto.LoginDTO;
 import com.djxlzk.dsasystem.dto.PasswordDTO;
 import com.djxlzk.dsasystem.dto.RegisterDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
+import com.djxlzk.dsasystem.service.AdminService;
 import com.djxlzk.dsasystem.service.CoachService;
 import com.djxlzk.dsasystem.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
+
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -24,6 +27,9 @@ public class UserController {
 
     @Autowired
     private CoachService coachService;
+
+    @Autowired
+    private AdminService adminService;
 
     /**
      * 学员注册
@@ -69,6 +75,17 @@ public class UserController {
     @PostMapping("/coach/login")
     public ResultDTO<?> coachLogin(@RequestBody @Validated LoginDTO loginDTO) {
         return coachService.login(loginDTO);
+    }
+
+    /**
+     * 管理员登录
+     *
+     * @param loginDTO 登录信息
+     * @return 响应结果
+     */
+    @PostMapping("/admin/login")
+    public ResultDTO<?> adminLogin(@RequestBody @Validated AdminLoginDTO loginDTO) {
+        return adminService.login(loginDTO);
     }
 
     /**
