@@ -13,7 +13,13 @@
 
 1. 确保安装 JDK 17 和 Maven。
 2. 配置 MySQL 数据库。
-3. 运行 `mvn spring-boot:run`。
+3. 运行后端： `mvn spring-boot:run`,
+   <br>启动前端：
+   ```bash
+   cd frontend
+   npm install #首次运行需要安装依赖
+   npm run dev
+   ```
 
 ## 构建
 
