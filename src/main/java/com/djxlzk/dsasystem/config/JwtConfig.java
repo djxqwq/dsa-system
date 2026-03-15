@@ -26,6 +26,7 @@ public class JwtConfig {
                         .antMatchers("/api/user/**").permitAll()
                         .antMatchers("/api/captcha/**").permitAll()
                         .antMatchers("/api/coach/**").hasRole("ADMIN")
+                        .antMatchers("/api/student/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
