@@ -46,12 +46,37 @@
         </div>
       </el-form>
     </div>
+
+    <div class="glass card">
+      <div class="head">
+        <div class="h">修改密码</div>
+        <div class="s">定期修改密码可以提高账户安全性</div>
+      </div>
+
+      <el-form :model="passwordForm" label-width="96px" class="form" :rules="passwordRules" ref="passwordFormRef">
+        <el-form-item label="原密码" prop="oldPassword">
+          <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" show-password />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password />
+        </el-form-item>
+
+        <div class="actions">
+          <el-button type="primary" @click="onChangePassword" :loading="passwordLoading">修改密码</el-button>
+          <el-button @click="onResetPassword">重置</el-button>
+        </div>
+      </el-form>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import http from '../../api/http'
 
 const form = reactive({
   name: '教练用户',
@@ -68,6 +93,65 @@ function onSave() {
 function onReset() {
   form.status = 'on'
   form.skills = ['k2']
+}
+
+const passwordFormRef = ref(null)
+const passwordLoading = ref(false)
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+})
+
+const validateConfirmPassword = (rule, value, callback) => {
+  if (value === '') {
+    callback(new Error('请再次输入新密码'))
+  } else if (value !== passwordForm.newPassword) {
+    callback(new Error('两次输入的密码不一致'))
+  } else {
+    callback()
+  }
+}
+
+const passwordRules = {
+  oldPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
+  newPassword: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' },
+  ],
+  confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
+}
+
+async function onChangePassword() {
+  try {
+    await passwordFormRef.value.validate()
+    passwordLoading.value = true
+    const res = await http.put('/api/user/coach/password', {
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword,
+    })
+    if (res.data.code === 200) {
+      ElMessage.success('密码修改成功')
+      onResetPassword()
+    } else {
+      ElMessage.error(res.data.message || '密码修改失败')
+    }
+  } catch (error) {
+    if (error.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    } else if (error !== false) {
+      ElMessage.error('密码修改失败，请稍后重试')
+    }
+  } finally {
+    passwordLoading.value = false
+  }
+}
+
+function onResetPassword() {
+  passwordForm.oldPassword = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmPassword = ''
+  passwordFormRef.value?.resetFields()
 }
 </script>
 
