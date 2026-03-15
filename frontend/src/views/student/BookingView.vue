@@ -3,7 +3,7 @@
     <div class="glass card animate-in">
       <div class="head">
         <div class="icon-wrapper">
-          <el-icon class="head-icon"><CalendarCheck /></el-icon>
+          <el-icon class="head-icon"><Calendar /></el-icon>
         </div>
         <div class="h">练车预约</div>
         <div class="s">选择教练与时间段，提交后等待确认</div>
@@ -97,7 +97,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { CalendarCheck, Check, Refresh, List, Close } from '@element-plus/icons-vue'
+import { Calendar, Check, Refresh, List, Close } from '@element-plus/icons-vue'
 
 const form = reactive({
   date: '',

@@ -34,6 +34,12 @@
           <el-button text class="hint" @click="goRegister">去注册</el-button>
         </div>
 
+        <div v-if="isDev" class="dev-entry">
+          <el-button type="success" plain size="small" :loading="devLoginLoading" @click="devAdminLogin">
+            开发：一键管理员登录
+          </el-button>
+        </div>
+
         <div class="tips">
           <div class="tip">学员端：预约练车、查学时、看历史</div>
           <div class="tip">教练端：排班、确认预约、学时记录</div>
@@ -58,6 +64,8 @@ const route = useRoute()
 const auth = useAuthStore()
 
 const formRef = ref()
+const isDev = import.meta.env.DEV
+const devLoginLoading = ref(false)
 
 const form = reactive({
   role: 'student',
@@ -186,6 +194,49 @@ async function onLogin() {
   router.replace(auth.homePath)
 }
 
+const DEV_ADMIN_SECRET = 'dev-admin-2025'
+
+async function devAdminLogin() {
+  devLoginLoading.value = true
+  try {
+    const res = await http.post('/api/user/admin/dev-login', { secret: DEV_ADMIN_SECRET })
+    const code = res?.data?.code
+    const ok = code === 200 || code === '200'
+    if (!ok) {
+      const msg = res?.data?.msg || '一键登录失败'
+      console.error('[一键登录] 后端返回异常', res?.data)
+      ElMessage.error(msg)
+      return
+    }
+    const data = res.data.data || {}
+    const token = data.token || ''
+    if (!token) {
+      console.error('[一键登录] 未返回 token', res?.data)
+      ElMessage.error('登录失败：未返回 token')
+      return
+    }
+    auth.login({
+      token,
+      role: 'admin',
+      profile: {
+        name: data.name || '管理员',
+        mobile: '',
+      },
+    })
+    ElMessage.success('已以管理员身份进入')
+    router.replace(auth.homePath)
+  } catch (e) {
+    const status = e?.response?.status
+    const msg = e?.response?.data?.msg || e?.response?.data?.message
+    let show = msg || (status ? `请求失败 ${status}` : '网络错误，请确认后端已启动且地址正确')
+    if (e?.code === 'ERR_NETWORK') show = '无法连接后端，请确认后端已启动（如 http://localhost:8080）'
+    console.error('[一键登录] 请求异常', e?.response?.data || e?.message || e)
+    ElMessage.error(show)
+  } finally {
+    devLoginLoading.value = false
+  }
+}
+
 onMounted(refreshCaptcha)
 </script>
 
@@ -248,6 +299,12 @@ onMounted(refreshCaptcha)
   align-items: center;
   gap: 10px;
   margin-top: 4px;
+}
+
+.dev-entry {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.14);
 }
 
 .btn {

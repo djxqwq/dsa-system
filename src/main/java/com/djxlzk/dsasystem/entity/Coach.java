@@ -3,6 +3,7 @@ package com.djxlzk.dsasystem.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -30,8 +31,9 @@ public class Coach {
     private String mobile;
 
     /**
-     * 密码
+     * 密码（接口不返回）
      */
+    @JsonIgnore
     private String password;
 
     /**

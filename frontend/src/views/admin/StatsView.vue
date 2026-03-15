@@ -12,7 +12,7 @@
       <div class="stats">
         <div class="stat glass animate-in" style="--delay: 0.1s">
           <div class="stat-icon">
-            <el-icon><CalendarCheck /></el-icon>
+            <el-icon><Calendar /></el-icon>
           </div>
           <div class="stat-content">
             <div class="k">今日预约</div>
@@ -77,7 +77,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { DataAnalysis, CalendarCheck, Clock, User, Van, Top, Bottom, Minus } from '@element-plus/icons-vue'
+import { DataAnalysis, Calendar, Clock, User, Van, Top, Bottom, Minus } from '@element-plus/icons-vue'
 
 const todayBookings = ref(128)
 const pendingConfirm = ref(23)
