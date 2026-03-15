@@ -144,7 +144,14 @@ async function fetch() {
       ElMessage.error(res.data.msg || '获取列表失败')
     }
   } catch (e) {
-    ElMessage.error('网络错误')
+    let msg = e?.response?.data?.msg || e?.message
+    if (e?.response?.status === 403) {
+      msg = '无权限访问，请使用管理员账号重新登录'
+    } else if (e?.code === 'ERR_NETWORK') {
+      msg = '无法连接后端，请确认后端已启动（默认 http://localhost:8080）'
+    }
+    if (!msg) msg = '网络错误'
+    ElMessage.error(msg)
   } finally {
     loading.value = false
   }
@@ -227,7 +234,9 @@ async function resetPwd(row) {
       ElMessage.error(res.data.msg || '重置失败')
     }
   } catch (e) {
-    ElMessage.error('网络错误')
+    const msg = e?.response?.status === 403 ? '无权限访问，请使用管理员账号重新登录'
+      : (e?.response?.data?.msg || e?.message || (e?.code === 'ERR_NETWORK' ? '无法连接后端，请确认后端已启动' : '网络错误'))
+    ElMessage.error(msg)
   }
 }
 
@@ -253,7 +262,9 @@ async function setStatus(row, status) {
       ElMessage.error(res.data.msg || '操作失败')
     }
   } catch (e) {
-    ElMessage.error('网络错误')
+    const msg = e?.response?.status === 403 ? '无权限访问，请使用管理员账号重新登录'
+      : (e?.response?.data?.msg || e?.message || (e?.code === 'ERR_NETWORK' ? '无法连接后端，请确认后端已启动' : '网络错误'))
+    ElMessage.error(msg)
   }
 }
 
@@ -272,7 +283,9 @@ async function remove(row) {
       ElMessage.error(res.data.msg || '删除失败')
     }
   } catch (e) {
-    ElMessage.error('网络错误')
+    const msg = e?.response?.status === 403 ? '无权限访问，请使用管理员账号重新登录'
+      : (e?.response?.data?.msg || e?.message || (e?.code === 'ERR_NETWORK' ? '无法连接后端，请确认后端已启动' : '网络错误'))
+    ElMessage.error(msg)
   }
 }
 

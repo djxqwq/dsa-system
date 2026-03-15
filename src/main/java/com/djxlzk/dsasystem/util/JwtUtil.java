@@ -79,7 +79,8 @@ public class JwtUtil {
      */
     public static Long getUserIdFromToken(String token) {
         Claims claims = parseToken(token);
-        return (Long) claims.get("userId");
+        Object idObj = claims.get("userId");
+        return idObj instanceof Number ? ((Number) idObj).longValue() : null;
     }
 
     /**
