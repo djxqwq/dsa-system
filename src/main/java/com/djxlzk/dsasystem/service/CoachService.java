@@ -7,12 +7,20 @@ import com.djxlzk.dsasystem.entity.Coach;
 
 public interface CoachService {
     ResultDTO<?> login(LoginDTO loginDTO);
+
     ResultDTO<?> updatePassword(Long coachId, String oldPassword, String newPassword);
+
     Coach getById(Long id);
 
     ResultDTO<?> addCoach(CoachDTO coachDTO);
+
     ResultDTO<?> deleteCoach(Long id);
+
     ResultDTO<?> updateCoach(CoachDTO coachDTO);
+
     ResultDTO<?> listCoaches(String keyword, int page, int size);
+
     ResultDTO<?> resetPassword(Long id);
+
+    ResultDTO<?> listAllCoaches();
 }

@@ -18,9 +18,14 @@
       </div>
 
       <el-table :data="rows" style="width: 100%" class="table" v-loading="loading">
-        <el-table-column prop="plateNumber" label="车牌" width="160" />
-        <el-table-column prop="vehicleType" label="车型" width="100" />
-        <el-table-column prop="status" label="状态" width="120">
+        <el-table-column prop="plateNumber" label="车牌" width="140" />
+        <el-table-column prop="vehicleType" label="车型" width="80" />
+        <el-table-column prop="coachName" label="关联教练" width="120">
+          <template #default="scope">
+            {{ scope.row.coachName || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)" effect="dark">
               {{ getStatusText(scope.row.status) }}
@@ -63,6 +68,16 @@
             <el-option label="C2" value="C2" />
           </el-select>
         </el-form-item>
+        <el-form-item label="关联教练">
+          <el-select v-model="form.coachId" style="width: 100%" placeholder="请选择教练" clearable filterable>
+            <el-option
+              v-for="coach in coaches"
+              :key="coach.id"
+              :label="`${coach.name} (${coach.coachNo})`"
+              :value="coach.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="form.status" style="width: 100%" placeholder="请选择状态">
             <el-option label="可用" :value="1" />
@@ -97,11 +112,13 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const submitting = ref(false)
+const coaches = ref([])
 
 const form = ref({
   id: null,
   plateNumber: '',
   vehicleType: '',
+  coachId: null,
   status: 1,
   remark: ''
 })
@@ -114,6 +131,17 @@ const getStatusType = (status) => {
 const getStatusText = (status) => {
   const map = { 0: '停用', 1: '可用', 2: '维修中' }
   return map[status] || '未知'
+}
+
+const fetchCoaches = async () => {
+  try {
+    const res = await http.get('/api/coach/all')
+    if (res.data.code === 200) {
+      coaches.value = res.data.data
+    }
+  } catch (e) {
+    console.error('获取教练列表失败')
+  }
 }
 
 const fetchList = async () => {
@@ -146,7 +174,7 @@ const openDialog = (row) => {
     form.value = { ...row }
   } else {
     isEdit.value = false
-    form.value = { id: null, plateNumber: '', vehicleType: '', status: 1, remark: '' }
+    form.value = { id: null, plateNumber: '', vehicleType: '', coachId: null, status: 1, remark: '' }
   }
   dialogVisible.value = true
 }
@@ -215,6 +243,7 @@ const handleDelete = async (id) => {
 
 onMounted(() => {
   fetchList()
+  fetchCoaches()
 })
 </script>
 

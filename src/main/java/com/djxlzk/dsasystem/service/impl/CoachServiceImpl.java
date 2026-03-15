@@ -167,9 +167,9 @@ public class CoachServiceImpl implements CoachService {
         QueryWrapper<Coach> wrapper = new QueryWrapper<>();
         if (StringUtils.hasText(keyword)) {
             wrapper.and(w -> w
-                .like("name", keyword)
-                .or().like("mobile", keyword)
-                .or().like("coach_no", keyword));
+                    .like("name", keyword)
+                    .or().like("mobile", keyword)
+                    .or().like("coach_no", keyword));
         }
         wrapper.orderByDesc("create_time");
         Page<Coach> result = coachMapper.selectPage(p, wrapper);
@@ -188,5 +188,14 @@ public class CoachServiceImpl implements CoachService {
         coach.setPassword(PasswordUtil.encrypt("12345678"));
         coachMapper.updateById(coach);
         return ResultDTO.success("密码已重置为 12345678");
+    }
+
+    @Override
+    public ResultDTO<?> listAllCoaches() {
+        QueryWrapper<Coach> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", 1);
+        wrapper.select("id", "name", "coach_no");
+        wrapper.orderByAsc("name");
+        return ResultDTO.success(coachMapper.selectList(wrapper));
     }
 }

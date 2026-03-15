@@ -43,4 +43,9 @@ public class CoachController {
     public ResultDTO<?> resetPassword(@PathVariable Long id) {
         return coachService.resetPassword(id);
     }
+
+    @GetMapping("/all")
+    public ResultDTO<?> listAllCoaches() {
+        return coachService.listAllCoaches();
+    }
 }

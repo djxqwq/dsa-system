@@ -33,4 +33,7 @@ public class Vehicle {
 
     @TableField("update_time")
     private LocalDateTime updateTime;
+
+    @TableField(exist = false)
+    private String coachName;
 }

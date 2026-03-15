@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.dto.VehicleDTO;
+import com.djxlzk.dsasystem.entity.Coach;
 import com.djxlzk.dsasystem.entity.Vehicle;
+import com.djxlzk.dsasystem.mapper.CoachMapper;
 import com.djxlzk.dsasystem.mapper.VehicleMapper;
 import com.djxlzk.dsasystem.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +15,19 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class VehicleServiceImpl implements VehicleService {
 
     @Autowired
     private VehicleMapper vehicleMapper;
+
+    @Autowired
+    private CoachMapper coachMapper;
 
     @Override
     public ResultDTO<?> addVehicle(VehicleDTO vehicleDTO) {
@@ -92,8 +100,25 @@ public class VehicleServiceImpl implements VehicleService {
         }
         wrapper.orderByDesc("create_time");
         Page<Vehicle> result = vehicleMapper.selectPage(p, wrapper);
+        
+        List<Vehicle> records = result.getRecords();
+        Set<Long> coachIds = records.stream()
+                .map(Vehicle::getCoachId)
+                .filter(id -> id != null)
+                .collect(Collectors.toSet());
+        if (!coachIds.isEmpty()) {
+            List<Coach> coaches = coachMapper.selectBatchIds(coachIds);
+            Map<Long, String> coachNameMap = coaches.stream()
+                    .collect(Collectors.toMap(Coach::getId, Coach::getName));
+            records.forEach(v -> {
+                if (v.getCoachId() != null) {
+                    v.setCoachName(coachNameMap.get(v.getCoachId()));
+                }
+            });
+        }
+        
         Map<String, Object> data = new HashMap<>();
-        data.put("records", result.getRecords());
+        data.put("records", records);
         data.put("total", result.getTotal());
         return ResultDTO.success(data);
     }
