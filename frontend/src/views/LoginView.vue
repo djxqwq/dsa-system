@@ -315,6 +315,16 @@ onMounted(refreshCaptcha)
   color: rgba(255, 255, 255, 0.72);
 }
 
+/* 悬停/聚焦时保持文字可见：浅色背景 + 高对比度文字 */
+.form :deep(.actions .el-button.hint:hover),
+.form :deep(.actions .el-button.hint:focus) {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.98);
+}
+.form :deep(.actions .el-button.hint:focus-visible) {
+  outline: none;
+}
+
 .captcha-row {
   display: grid;
   grid-template-columns: 1fr 130px;
