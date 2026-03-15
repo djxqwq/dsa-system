@@ -5,6 +5,7 @@ import com.djxlzk.dsasystem.dto.LoginDTO;
 import com.djxlzk.dsasystem.dto.PasswordDTO;
 import com.djxlzk.dsasystem.dto.RegisterDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
+import com.djxlzk.dsasystem.dto.StudentProfileDTO;
 import com.djxlzk.dsasystem.service.AdminService;
 import com.djxlzk.dsasystem.service.CoachService;
 import com.djxlzk.dsasystem.service.StudentService;
@@ -99,5 +100,30 @@ public class UserController {
     public ResultDTO<?> updateCoachPassword(@RequestBody PasswordDTO passwordDTO, Authentication authentication) {
         Long coachId = (Long) authentication.getPrincipal();
         return coachService.updatePassword(coachId, passwordDTO.getOldPassword(), passwordDTO.getNewPassword());
+    }
+
+    /**
+     * 学员获取个人信息
+     * 
+     * @param authentication 认证信息
+     * @return 响应结果
+     */
+    @GetMapping("/student/profile")
+    public ResultDTO<?> getStudentProfile(Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        return studentService.getProfile(studentId);
+    }
+
+    /**
+     * 学员更新个人信息
+     * 
+     * @param profileDTO     个人信息
+     * @param authentication 认证信息
+     * @return 响应结果
+     */
+    @PutMapping("/student/profile")
+    public ResultDTO<?> updateStudentProfile(@RequestBody @Validated StudentProfileDTO profileDTO, Authentication authentication) {
+        Long studentId = (Long) authentication.getPrincipal();
+        return studentService.updateProfile(studentId, profileDTO);
     }
 }

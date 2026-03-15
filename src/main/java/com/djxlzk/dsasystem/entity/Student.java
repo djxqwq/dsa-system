@@ -53,4 +53,10 @@ public class Student {
      */
     @TableField("no_show_count")
     private Integer noShowCount;
+
+    /**
+     * 车型（C1/C2）
+     */
+    @TableField("car_type")
+    private String carType;
 }

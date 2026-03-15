@@ -6,26 +6,21 @@
         <div class="s">完善资料，方便教练确认与系统通知</div>
       </div>
 
-      <el-form :model="form" label-width="96px" class="form">
+      <el-form :model="form" label-width="96px" class="form" v-loading="loading">
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12">
-            <el-form-item label="姓名">
+            <el-form-item label="姓名" required>
               <el-input v-model="form.name" placeholder="请输入姓名" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
-            <el-form-item label="手机号">
+            <el-form-item label="手机号" required>
               <el-input v-model="form.mobile" placeholder="请输入手机号" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
-            <el-form-item label="证件号">
-              <el-input v-model="form.idNo" placeholder="可选" />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
             <el-form-item label="车型">
-              <el-select v-model="form.carType" placeholder="请选择">
+              <el-select v-model="form.carType" placeholder="请选择" style="width: 100%">
                 <el-option label="C1" value="C1" />
                 <el-option label="C2" value="C2" />
               </el-select>
@@ -33,12 +28,8 @@
           </el-col>
         </el-row>
 
-        <el-form-item label="备注">
-          <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="可选" />
-        </el-form-item>
-
         <div class="actions">
-          <el-button type="primary" @click="onSave">保存</el-button>
+          <el-button type="primary" @click="onSave" :loading="loading">保存</el-button>
           <el-button @click="onReset">重置</el-button>
         </div>
       </el-form>
@@ -71,26 +62,84 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http'
+import { useAuthStore } from '../../stores/auth'
+
+const authStore = useAuthStore()
 
 const form = reactive({
-  name: '学员用户',
-  mobile: '13800138000',
-  idNo: '',
+  name: authStore.profile?.name || '',
+  mobile: authStore.profile?.mobile || '',
   carType: 'C1',
-  remark: '',
 })
 
-function onSave() {
-  ElMessage.success('已保存（演示）')
+const loading = ref(false)
+
+onMounted(async () => {
+  await loadProfile()
+})
+
+async function loadProfile() {
+  try {
+    loading.value = true
+    const res = await http.get('/api/user/student/profile')
+    if (res.data.code === 200) {
+      const data = res.data.data
+      form.name = data.userName || ''
+      form.mobile = data.mobile || ''
+      form.carType = data.carType || 'C1'
+    }
+  } catch (error) {
+    console.error('加载个人信息失败', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function onSave() {
+  if (!form.name?.trim()) {
+    ElMessage.warning('请输入姓名')
+    return
+  }
+  if (!form.mobile?.trim()) {
+    ElMessage.warning('请输入手机号')
+    return
+  }
+  if (!/^1[3-9]\d{9}$/.test(form.mobile)) {
+    ElMessage.warning('手机号格式不正确')
+    return
+  }
+  try {
+    loading.value = true
+    const res = await http.put('/api/user/student/profile', {
+      userName: form.name,
+      mobile: form.mobile,
+      carType: form.carType,
+    })
+    if (res.data.code === 200) {
+      ElMessage.success('保存成功')
+      authStore.profile.name = form.name
+      authStore.profile.mobile = form.mobile
+      authStore.persist()
+    } else {
+      ElMessage.error(res.data.msg || '保存失败')
+    }
+  } catch (error) {
+    const msg = error.response?.data?.msg || error.response?.data?.message
+    if (msg) {
+      ElMessage.error(msg)
+    } else {
+      ElMessage.error('保存失败，请稍后重试')
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 function onReset() {
-  form.idNo = ''
-  form.remark = ''
-  form.carType = 'C1'
+  loadProfile()
 }
 
 const passwordFormRef = ref(null)

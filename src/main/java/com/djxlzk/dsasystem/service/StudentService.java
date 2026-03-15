@@ -4,6 +4,7 @@ import com.djxlzk.dsasystem.dto.LoginDTO;
 import com.djxlzk.dsasystem.dto.RegisterDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.dto.StudentDTO;
+import com.djxlzk.dsasystem.dto.StudentProfileDTO;
 import com.djxlzk.dsasystem.entity.Student;
 
 public interface StudentService {
@@ -17,4 +18,7 @@ public interface StudentService {
     ResultDTO<?> updateStudent(StudentDTO studentDTO);
     ResultDTO<?> listStudents(String keyword, Integer status, int page, int size);
     ResultDTO<?> resetPassword(Long id);
+
+    ResultDTO<?> getProfile(Long studentId);
+    ResultDTO<?> updateProfile(Long studentId, StudentProfileDTO profileDTO);
 }

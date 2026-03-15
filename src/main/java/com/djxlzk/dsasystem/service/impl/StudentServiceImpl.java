@@ -6,6 +6,7 @@ import com.djxlzk.dsasystem.dto.LoginDTO;
 import com.djxlzk.dsasystem.dto.RegisterDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.dto.StudentDTO;
+import com.djxlzk.dsasystem.dto.StudentProfileDTO;
 import com.djxlzk.dsasystem.entity.Student;
 import com.djxlzk.dsasystem.mapper.StudentMapper;
 import com.djxlzk.dsasystem.service.StudentService;
@@ -205,5 +206,47 @@ public class StudentServiceImpl implements StudentService {
         student.setPassword(PasswordUtil.encrypt("12345678"));
         studentMapper.updateById(student);
         return ResultDTO.success("密码已重置为 12345678");
+    }
+
+    @Override
+    public ResultDTO<?> getProfile(Long studentId) {
+        Student student = studentMapper.selectById(studentId);
+        if (student == null) {
+            return ResultDTO.error(400, "学员不存在");
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", student.getId());
+        data.put("userName", student.getUserName());
+        data.put("mobile", student.getMobile());
+        data.put("carType", student.getCarType());
+        data.put("status", student.getStatus());
+        return ResultDTO.success(data);
+    }
+
+    @Override
+    public ResultDTO<?> updateProfile(Long studentId, StudentProfileDTO profileDTO) {
+        Student student = studentMapper.selectById(studentId);
+        if (student == null) {
+            return ResultDTO.error(400, "学员不存在");
+        }
+        if (StringUtils.hasText(profileDTO.getUserName())) {
+            student.setUserName(profileDTO.getUserName());
+        }
+        if (StringUtils.hasText(profileDTO.getMobile()) && !profileDTO.getMobile().equals(student.getMobile())) {
+            QueryWrapper<Student> w = new QueryWrapper<>();
+            w.eq("mobile", profileDTO.getMobile());
+            if (studentMapper.selectCount(w) > 0) {
+                return ResultDTO.error(400, "该手机号已被使用");
+            }
+            student.setMobile(profileDTO.getMobile());
+        }
+        if (profileDTO.getCarType() != null) {
+            student.setCarType(profileDTO.getCarType());
+        }
+        studentMapper.updateById(student);
+        Map<String, Object> data = new HashMap<>();
+        data.put("userName", student.getUserName());
+        data.put("mobile", student.getMobile());
+        return ResultDTO.success("更新成功", data);
     }
 }
