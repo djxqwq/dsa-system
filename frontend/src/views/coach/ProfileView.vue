@@ -113,12 +113,19 @@ const validateConfirmPassword = (rule, value, callback) => {
   }
 }
 
+const validatePassword = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('请输入新密码'))
+  } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/.test(value)) {
+    callback(new Error('密码长度需8-20位，包含字母和数字'))
+  } else {
+    callback()
+  }
+}
+
 const passwordRules = {
   oldPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
-  newPassword: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' },
-  ],
+  newPassword: [{ required: true, validator: validatePassword, trigger: 'blur' }],
   confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
 }
 
@@ -134,11 +141,12 @@ async function onChangePassword() {
       ElMessage.success('密码修改成功')
       onResetPassword()
     } else {
-      ElMessage.error(res.data.message || '密码修改失败')
+      ElMessage.error(res.data.msg || '密码修改失败')
     }
   } catch (error) {
-    if (error.response?.data?.message) {
-      ElMessage.error(error.response.data.message)
+    const msg = error.response?.data?.msg || error.response?.data?.message
+    if (msg) {
+      ElMessage.error(msg)
     } else if (error !== false) {
       ElMessage.error('密码修改失败，请稍后重试')
     }
