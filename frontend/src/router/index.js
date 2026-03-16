@@ -14,6 +14,7 @@ const CoachProfile = () => import('../views/coach/ProfileView.vue')
 const CoachSchedule = () => import('../views/coach/ScheduleView.vue')
 const CoachConfirm = () => import('../views/coach/ConfirmView.vue')
 const CoachHours = () => import('../views/coach/HoursRecordView.vue')
+const CoachAppointments = () => import('../views/coach/AppointmentsView.vue')
 
 const AdminUsers = () => import('../views/admin/UsersView.vue')
 const AdminCoaches = () => import('../views/admin/CoachesView.vue')
@@ -37,6 +38,7 @@ const routes = [
       { path: 'coach/profile', name: 'coach-profile', component: CoachProfile, meta: { role: 'coach', title: '个人信息' } },
       { path: 'coach/schedule', name: 'coach-schedule', component: CoachSchedule, meta: { role: 'coach', title: '排班管理' } },
       { path: 'coach/confirm', name: 'coach-confirm', component: CoachConfirm, meta: { role: 'coach', title: '预约确认' } },
+      { path: 'coach/appointments', name: 'coach-appointments', component: CoachAppointments, meta: { role: 'coach', title: '预约记录' } },
       { path: 'coach/hours', name: 'coach-hours', component: CoachHours, meta: { role: 'coach', title: '学时记录' } },
 
       { path: 'admin/users', name: 'admin-users', component: AdminUsers, meta: { role: 'admin', title: '用户管理' } },

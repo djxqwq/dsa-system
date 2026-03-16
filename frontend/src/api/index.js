@@ -55,7 +55,7 @@ export const appointmentApi = {
   },
 
   getCoachAppointments(status) {
-    const params = status !== undefined ? `?status=${status}` : ''
+    const params = status != null ? `?status=${status}` : ''
     return http.get(`/api/appointment/coach${params}`)
   },
 
