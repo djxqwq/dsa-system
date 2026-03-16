@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Mapper
@@ -44,4 +45,12 @@ public interface ScheduleMapper extends BaseMapper<Schedule> {
                         "LEFT JOIN coach c ON s.coach_id = c.id " +
                         "WHERE s.id = #{id}")
         Schedule findByIdWithCoachName(@Param("id") Long id);
+
+        @Select("SELECT COUNT(*) FROM schedule " +
+                        "WHERE coach_id = #{coachId} " +
+                        "AND schedule_date = #{date} " +
+                        "AND start_time = #{startTime} " +
+                        "AND end_time = #{endTime}")
+        int countByCoachDateAndTime(@Param("coachId") Long coachId, @Param("date") LocalDate date,
+                        @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 }

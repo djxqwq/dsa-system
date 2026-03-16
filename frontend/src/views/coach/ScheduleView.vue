@@ -6,7 +6,7 @@
           <el-icon class="head-icon"><Calendar /></el-icon>
         </div>
         <div class="h">排班管理</div>
-        <div class="s">设置可预约时段，最少排班两小时</div>
+        <div class="s">设置可预约时段，每个时段半小时，可独立设置状态和名额</div>
       </div>
 
       <div class="tools">
@@ -17,19 +17,29 @@
         </el-button>
       </div>
 
-      <el-table :data="schedules" style="width: 100%" class="table" v-loading="loading">
+      <el-table :data="schedules" style="width: 100%" class="table" v-loading="loading" :span-method="dateSpanMethod">
         <el-table-column prop="scheduleDate" label="日期" width="120" />
         <el-table-column label="时间段" width="160">
           <template #default="scope">
             {{ scope.row.startTime }} - {{ scope.row.endTime }}
           </template>
         </el-table-column>
-        <el-table-column label="名额" width="120">
+        <el-table-column label="学员" min-width="150">
+          <template #default="scope">
+            <div v-if="scope.row.studentNames && scope.row.studentNames.length > 0" class="student-list">
+              <el-tag v-for="(name, index) in scope.row.studentNames" :key="index" size="small" type="success" class="student-tag">
+                {{ name }}
+              </el-tag>
+            </div>
+            <span v-else class="no-student">暂无</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="名额" width="100">
           <template #default="scope">
             {{ scope.row.bookedCount }} / {{ scope.row.capacity }}
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="120">
+        <el-table-column label="状态" width="100">
           <template #default="scope">
             <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" effect="dark" class="status-tag">
               <el-icon v-if="scope.row.status === 1"><Check /></el-icon>
@@ -63,8 +73,8 @@
         <el-form-item label="日期">
           <el-date-picker v-model="form.scheduleDate" type="date" placeholder="选择日期" style="width: 100%" :disabled="isEdit" />
         </el-form-item>
-        <el-form-item label="开始时间">
-          <el-select v-model="form.startTime" placeholder="选择开始时间" style="width: 100%" :disabled="isEdit" @change="onStartTimeChange">
+        <el-form-item label="开始时间" v-if="!isEdit">
+          <el-select v-model="form.startTime" placeholder="选择开始时间" style="width: 100%" @change="onStartTimeChange">
             <el-option-group label="上午">
               <el-option v-for="t in morningStartTimes" :key="t" :label="t" :value="t" />
             </el-option-group>
@@ -73,8 +83,8 @@
             </el-option-group>
           </el-select>
         </el-form-item>
-        <el-form-item label="结束时间">
-          <el-select v-model="form.endTime" placeholder="选择结束时间" style="width: 100%" :disabled="isEdit">
+        <el-form-item label="结束时间" v-if="!isEdit">
+          <el-select v-model="form.endTime" placeholder="选择结束时间" style="width: 100%">
             <el-option-group label="上午">
               <el-option v-for="t in morningEndTimes" :key="t" :label="t" :value="t" :disabled="!isValidEndTime(t)" />
             </el-option-group>
@@ -83,16 +93,16 @@
             </el-option-group>
           </el-select>
         </el-form-item>
-        <el-form-item label="时段时长">
-          <div class="duration-info" v-if="form.startTime && form.endTime">
-            {{ calculateDuration() }} 小时
-          </div>
-          <div class="duration-info warning" v-else-if="form.startTime">
-            请选择结束时间（最少2小时）
+        <el-form-item label="时间段" v-if="isEdit">
+          <div class="slot-info">{{ form.startTime }} - {{ form.endTime }}（半小时）</div>
+        </el-form-item>
+        <el-form-item label="时段时长" v-if="!isEdit && form.startTime && form.endTime">
+          <div class="duration-info">
+            {{ calculateDuration() }} 小时，将创建 {{ calculateSlotCount() }} 个半小时时段
           </div>
         </el-form-item>
         <el-form-item label="可约名额">
-          <el-input-number v-model="form.capacity" :min="1" :max="10" style="width: 100%" />
+          <el-input-number v-model="form.capacity" :min="1" :max="4" style="width: 100%" />
         </el-form-item>
         <el-form-item label="状态">
           <el-switch v-model="form.statusActive" active-text="开放" inactive-text="关闭" />
@@ -148,7 +158,7 @@ const form = ref({
   scheduleDate: '',
   startTime: '',
   endTime: '',
-  capacity: 1,
+  capacity: 3,
   statusActive: true
 })
 
@@ -185,8 +195,35 @@ function calculateDuration() {
   return (end - start) / 60
 }
 
+function calculateSlotCount() {
+  if (!form.value.startTime || !form.value.endTime) return 0
+  const start = timeToMinutes(form.value.startTime)
+  const end = timeToMinutes(form.value.endTime)
+  return Math.floor((end - start) / 30)
+}
+
 function onStartTimeChange() {
   form.value.endTime = ''
+}
+
+function dateSpanMethod({ row, column, rowIndex, columnIndex }) {
+  if (columnIndex === 0) {
+    const currentDate = row.scheduleDate
+    let spanCount = 1
+    for (let i = rowIndex + 1; i < schedules.value.length; i++) {
+      if (schedules.value[i].scheduleDate === currentDate) {
+        spanCount++
+      } else {
+        break
+      }
+    }
+    const isFirstInGroup = rowIndex === 0 || schedules.value[rowIndex - 1].scheduleDate !== currentDate
+    if (isFirstInGroup) {
+      return { rowspan: spanCount, colspan: 1 }
+    } else {
+      return { rowspan: 0, colspan: 0 }
+    }
+  }
 }
 
 async function loadSchedules() {
@@ -195,7 +232,14 @@ async function loadSchedules() {
     const startDate = filterDate.value ? formatDate(filterDate.value) : formatDate(new Date())
     const res = await scheduleApi.getCoachSchedules(startDate)
     if (res.data.code === 200) {
-      schedules.value = res.data.data || []
+      const data = res.data.data || []
+      data.sort((a, b) => {
+        if (a.scheduleDate !== b.scheduleDate) {
+          return a.scheduleDate.localeCompare(b.scheduleDate)
+        }
+        return a.startTime.localeCompare(b.startTime)
+      })
+      schedules.value = data
     } else {
       ElMessage.error(res.data.msg || '加载失败')
     }
@@ -213,7 +257,7 @@ function openAddDialog() {
     scheduleDate: filterDate.value || new Date(),
     startTime: '',
     endTime: '',
-    capacity: 1,
+    capacity: 3,
     statusActive: true
   }
   dialogVisible.value = true
@@ -233,15 +277,22 @@ function openEditDialog(row) {
 }
 
 async function submitForm() {
-  if (!form.value.scheduleDate || !form.value.startTime || !form.value.endTime) {
-    ElMessage.warning('请填写完整信息')
+  if (!form.value.scheduleDate) {
+    ElMessage.warning('请选择日期')
     return
   }
 
-  const duration = calculateDuration()
-  if (duration < 2) {
-    ElMessage.warning('排班时长最少2小时')
-    return
+  if (!isEdit.value) {
+    if (!form.value.startTime || !form.value.endTime) {
+      ElMessage.warning('请填写完整信息')
+      return
+    }
+
+    const duration = calculateDuration()
+    if (duration < 2) {
+      ElMessage.warning('排班时长最少2小时')
+      return
+    }
   }
 
   submitting.value = true
@@ -263,7 +314,7 @@ async function submitForm() {
     }
 
     if (res.data.code === 200) {
-      ElMessage.success(isEdit.value ? '修改成功' : '新增成功')
+      ElMessage.success(res.data.msg)
       dialogVisible.value = false
       loadSchedules()
     } else {
@@ -407,11 +458,30 @@ onMounted(() => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.table :deep(.el-table td.el-table__cell) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .status-tag {
   display: flex;
   align-items: center;
   gap: 4px;
   font-weight: 600;
+}
+
+.student-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.student-tag {
+  font-size: 12px;
+}
+
+.no-student {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
 }
 
 .action-btn {
@@ -431,9 +501,12 @@ onMounted(() => {
   border-radius: 6px;
 }
 
-.duration-info.warning {
-  background: rgba(230, 162, 60, 0.2);
-  color: #e6a23c;
+.slot-info {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  padding: 8px 12px;
+  background: rgba(79, 140, 255, 0.2);
+  border-radius: 6px;
 }
 
 .animate-in {

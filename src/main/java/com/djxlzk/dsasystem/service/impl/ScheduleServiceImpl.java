@@ -3,6 +3,7 @@ package com.djxlzk.dsasystem.service.impl;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.dto.ScheduleDTO;
 import com.djxlzk.dsasystem.entity.Schedule;
+import com.djxlzk.dsasystem.mapper.AppointmentMapper;
 import com.djxlzk.dsasystem.mapper.ScheduleMapper;
 import com.djxlzk.dsasystem.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     private ScheduleMapper scheduleMapper;
 
+    @Autowired
+    private AppointmentMapper appointmentMapper;
+
     @Override
     @Transactional
     public ResultDTO<?> createSchedule(ScheduleDTO dto, Long coachId) {
@@ -31,17 +35,47 @@ public class ScheduleServiceImpl implements ScheduleService {
             return ResultDTO.error(400, "排班时长最少2小时");
         }
 
-        Schedule schedule = new Schedule();
-        schedule.setCoachId(coachId);
-        schedule.setScheduleDate(LocalDate.parse(dto.getScheduleDate()));
-        schedule.setStartTime(startTime);
-        schedule.setEndTime(endTime);
-        schedule.setCapacity(dto.getCapacity() != null ? dto.getCapacity() : 1);
-        schedule.setBookedCount(0);
-        schedule.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+        int slotCount = (int) (durationMinutes / 30);
+        LocalDate scheduleDate = LocalDate.parse(dto.getScheduleDate());
+        Integer capacity = dto.getCapacity() != null ? dto.getCapacity() : 3;
+        Integer status = dto.getStatus() != null ? dto.getStatus() : 1;
 
-        scheduleMapper.insert(schedule);
-        return ResultDTO.success("排班创建成功", schedule);
+        int createdCount = 0;
+        int skippedCount = 0;
+
+        for (int i = 0; i < slotCount; i++) {
+            LocalTime slotStart = startTime.plusMinutes(i * 30);
+            LocalTime slotEnd = slotStart.plusMinutes(30);
+
+            int exists = scheduleMapper.countByCoachDateAndTime(coachId, scheduleDate, slotStart, slotEnd);
+            if (exists > 0) {
+                skippedCount++;
+                continue;
+            }
+
+            Schedule schedule = new Schedule();
+            schedule.setCoachId(coachId);
+            schedule.setScheduleDate(scheduleDate);
+            schedule.setStartTime(slotStart);
+            schedule.setEndTime(slotEnd);
+            schedule.setCapacity(capacity);
+            schedule.setBookedCount(0);
+            schedule.setStatus(status);
+
+            scheduleMapper.insert(schedule);
+            createdCount++;
+        }
+
+        if (createdCount == 0) {
+            return ResultDTO.error(400, "所选时间段均已存在排班");
+        }
+
+        String message = "排班创建成功，共创建 " + createdCount + " 个半小时时段";
+        if (skippedCount > 0) {
+            message += "，跳过 " + skippedCount + " 个已存在时段";
+        }
+
+        return ResultDTO.success(message, null);
     }
 
     @Override
@@ -107,6 +141,16 @@ public class ScheduleServiceImpl implements ScheduleService {
             startDate = LocalDate.now();
         }
         List<Schedule> schedules = scheduleMapper.findByCoachIdFromDate(coachId, startDate);
+
+        for (Schedule schedule : schedules) {
+            List<String> studentNames = appointmentMapper.findStudentNamesBySchedule(
+                    coachId,
+                    schedule.getScheduleDate(),
+                    schedule.getStartTime(),
+                    schedule.getEndTime());
+            schedule.setStudentNames(studentNames);
+        }
+
         return ResultDTO.success(schedules);
     }
 

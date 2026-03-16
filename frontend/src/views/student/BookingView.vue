@@ -280,17 +280,27 @@ function isValidEndTime(endTime) {
   const duration = (endMinutes - startMinutes) / 60
   if (duration < 1) return false
   
-  for (const slot of availableSlots.value) {
-    const slotStart = timeToMinutes(slot.startTime)
-    const slotEnd = timeToMinutes(slot.endTime)
-    const remaining = getRemaining(slot)
+  const slotCount = Math.floor((endMinutes - startMinutes) / 30)
+  for (let i = 0; i < slotCount; i++) {
+    const slotStart = startMinutes + i * 30
+    const slotEnd = slotStart + 30
     
-    if (remaining > 0 && startMinutes >= slotStart && endMinutes <= slotEnd) {
-      return true
+    let found = false
+    for (const slot of availableSlots.value) {
+      const sStart = timeToMinutes(slot.startTime)
+      const sEnd = timeToMinutes(slot.endTime)
+      const remaining = getRemaining(slot)
+      
+      if (slotStart === sStart && slotEnd === sEnd && remaining > 0) {
+        found = true
+        break
+      }
     }
+    
+    if (!found) return false
   }
   
-  return false
+  return true
 }
 
 function calculateDuration() {
