@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -22,11 +23,19 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public ResultDTO<?> createSchedule(ScheduleDTO dto, Long coachId) {
+        LocalTime startTime = LocalTime.parse(dto.getStartTime());
+        LocalTime endTime = LocalTime.parse(dto.getEndTime());
+        
+        long durationMinutes = Duration.between(startTime, endTime).toMinutes();
+        if (durationMinutes < 120) {
+            return ResultDTO.error(400, "排班时长最少2小时");
+        }
+
         Schedule schedule = new Schedule();
         schedule.setCoachId(coachId);
         schedule.setScheduleDate(LocalDate.parse(dto.getScheduleDate()));
-        schedule.setStartTime(LocalTime.parse(dto.getStartTime()));
-        schedule.setEndTime(LocalTime.parse(dto.getEndTime()));
+        schedule.setStartTime(startTime);
+        schedule.setEndTime(endTime);
         schedule.setCapacity(dto.getCapacity() != null ? dto.getCapacity() : 1);
         schedule.setBookedCount(0);
         schedule.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);

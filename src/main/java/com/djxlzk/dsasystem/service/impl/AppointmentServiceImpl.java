@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -30,37 +32,48 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public ResultDTO<?> createAppointment(AppointmentCreateDTO dto, Long studentId) {
-        Schedule schedule = scheduleMapper.selectById(dto.getScheduleId());
-        if (schedule == null) {
-            return ResultDTO.error(404, "排班不存在");
+        LocalDate appointmentDate = LocalDate.parse(dto.getAppointmentDate());
+        LocalTime startTime = LocalTime.parse(dto.getStartTime());
+        LocalTime endTime = LocalTime.parse(dto.getEndTime());
+
+        long durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
+        if (durationMinutes < 60) {
+            return ResultDTO.error(400, "预约时长最少1小时");
         }
 
-        if (schedule.getStatus() != 1) {
-            return ResultDTO.error(400, "该时段未开放预约");
+        List<Schedule> availableSlots = scheduleMapper.findAvailableSlotsByCoach(appointmentDate, dto.getCoachId());
+
+        Schedule matchedSlot = null;
+        for (Schedule slot : availableSlots) {
+            boolean isWithinSlot = !startTime.isBefore(slot.getStartTime()) && !endTime.isAfter(slot.getEndTime());
+            if (isWithinSlot && slot.getStatus() == 1 && slot.getRemainingCapacity() != null
+                    && slot.getRemainingCapacity() > 0) {
+                matchedSlot = slot;
+                break;
+            }
         }
 
-        if (schedule.getBookedCount() >= schedule.getCapacity()) {
-            return ResultDTO.error(400, "该时段已约满");
+        if (matchedSlot == null) {
+            return ResultDTO.error(400, "该时间段未开放预约或已约满");
         }
 
-        int existingCount = appointmentMapper.countByScheduleAndStudent(dto.getScheduleId(), studentId);
+        int existingCount = appointmentMapper.countByDateAndTime(studentId, appointmentDate, startTime, endTime);
         if (existingCount > 0) {
-            return ResultDTO.error(400, "您已预约过该时段");
+            return ResultDTO.error(400, "您在该时间段已有预约");
         }
 
         Appointment appointment = new Appointment();
-        appointment.setScheduleId(dto.getScheduleId());
         appointment.setStudentId(studentId);
-        appointment.setCoachId(dto.getCoachId() != null ? dto.getCoachId() : schedule.getCoachId());
+        appointment.setCoachId(dto.getCoachId());
         appointment.setVehicleId(dto.getVehicleId());
-        appointment.setAppointmentDate(schedule.getScheduleDate());
-        appointment.setStartTime(schedule.getStartTime());
-        appointment.setEndTime(schedule.getEndTime());
+        appointment.setAppointmentDate(appointmentDate);
+        appointment.setStartTime(startTime);
+        appointment.setEndTime(endTime);
         appointment.setStatus(0);
         appointment.setRemark(dto.getRemark());
 
         appointmentMapper.insert(appointment);
-        scheduleMapper.updateBookedCount(dto.getScheduleId(), 1);
+        scheduleMapper.updateBookedCount(matchedSlot.getId(), 1);
 
         return ResultDTO.success("预约成功，等待教练确认", appointment);
     }
@@ -87,9 +100,21 @@ public class AppointmentServiceImpl implements AppointmentService {
             return ResultDTO.error(400, "已完成的预约无法取消");
         }
 
+        LocalDate appointmentDate = appointment.getAppointmentDate();
+        LocalTime startTime = appointment.getStartTime();
+        LocalTime endTime = appointment.getEndTime();
+
         appointment.setStatus(3);
         appointmentMapper.updateById(appointment);
-        scheduleMapper.updateBookedCount(appointment.getScheduleId(), -1);
+
+        List<Schedule> schedules = scheduleMapper.findAvailableSlotsByCoach(appointmentDate, appointment.getCoachId());
+        for (Schedule slot : schedules) {
+            boolean isWithinSlot = !startTime.isBefore(slot.getStartTime()) && !endTime.isAfter(slot.getEndTime());
+            if (isWithinSlot) {
+                scheduleMapper.updateBookedCount(slot.getId(), -1);
+                break;
+            }
+        }
 
         if ("student".equals(role)) {
             Student student = studentMapper.selectById(userId);

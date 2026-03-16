@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Mapper
@@ -39,8 +40,15 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
             "ORDER BY a.appointment_date, a.start_time")
     List<Appointment> findByCoachIdAndStatus(@Param("coachId") Long coachId, @Param("status") Integer status);
 
-    @Select("SELECT COUNT(*) FROM appointment WHERE schedule_id = #{scheduleId} AND student_id = #{studentId} AND status != 3")
-    int countByScheduleAndStudent(@Param("scheduleId") Long scheduleId, @Param("studentId") Long studentId);
+    @Select("SELECT COUNT(*) FROM appointment " +
+            "WHERE student_id = #{studentId} " +
+            "AND appointment_date = #{date} " +
+            "AND status != 3 " +
+            "AND ((start_time <= #{startTime} AND end_time > #{startTime}) " +
+            "OR (start_time < #{endTime} AND end_time >= #{endTime}) " +
+            "OR (start_time >= #{startTime} AND end_time <= #{endTime}))")
+    int countByDateAndTime(@Param("studentId") Long studentId, @Param("date") LocalDate date, 
+                           @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 
     @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number " +
             "FROM appointment a " +

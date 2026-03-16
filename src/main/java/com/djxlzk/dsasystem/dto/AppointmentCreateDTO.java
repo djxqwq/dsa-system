@@ -4,8 +4,10 @@ import lombok.Data;
 
 @Data
 public class AppointmentCreateDTO {
-    private Long scheduleId;
     private Long coachId;
     private Long vehicleId;
+    private String appointmentDate;
+    private String startTime;
+    private String endTime;
     private String remark;
 }

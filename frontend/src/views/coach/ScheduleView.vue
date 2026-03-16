@@ -6,7 +6,7 @@
           <el-icon class="head-icon"><Calendar /></el-icon>
         </div>
         <div class="h">排班管理</div>
-        <div class="s">设置可预约时段，确保学员能够顺利预约</div>
+        <div class="s">设置可预约时段，最少排班两小时</div>
       </div>
 
       <div class="tools">
@@ -58,16 +58,38 @@
       </el-table>
     </div>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑时段' : '新增时段'" width="400px">
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑时段' : '新增时段'" width="450px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="日期">
           <el-date-picker v-model="form.scheduleDate" type="date" placeholder="选择日期" style="width: 100%" :disabled="isEdit" />
         </el-form-item>
         <el-form-item label="开始时间">
-          <el-time-select v-model="form.startTime" placeholder="选择开始时间" :max-time="form.endTime" style="width: 100%" start="06:00" step="01:00" end="22:00" />
+          <el-select v-model="form.startTime" placeholder="选择开始时间" style="width: 100%" :disabled="isEdit" @change="onStartTimeChange">
+            <el-option-group label="上午">
+              <el-option v-for="t in morningStartTimes" :key="t" :label="t" :value="t" />
+            </el-option-group>
+            <el-option-group label="下午">
+              <el-option v-for="t in afternoonStartTimes" :key="t" :label="t" :value="t" />
+            </el-option-group>
+          </el-select>
         </el-form-item>
         <el-form-item label="结束时间">
-          <el-time-select v-model="form.endTime" placeholder="选择结束时间" :min-time="form.startTime" style="width: 100%" start="06:00" step="01:00" end="22:00" />
+          <el-select v-model="form.endTime" placeholder="选择结束时间" style="width: 100%" :disabled="isEdit">
+            <el-option-group label="上午">
+              <el-option v-for="t in morningEndTimes" :key="t" :label="t" :value="t" :disabled="!isValidEndTime(t)" />
+            </el-option-group>
+            <el-option-group label="下午">
+              <el-option v-for="t in afternoonEndTimes" :key="t" :label="t" :value="t" :disabled="!isValidEndTime(t)" />
+            </el-option-group>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="时段时长">
+          <div class="duration-info" v-if="form.startTime && form.endTime">
+            {{ calculateDuration() }} 小时
+          </div>
+          <div class="duration-info warning" v-else-if="form.startTime">
+            请选择结束时间（最少2小时）
+          </div>
         </el-form-item>
         <el-form-item label="可约名额">
           <el-input-number v-model="form.capacity" :min="1" :max="10" style="width: 100%" />
@@ -85,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Calendar, Plus, Check, Close, Delete, Edit } from '@element-plus/icons-vue'
 import { scheduleApi } from '../../api'
@@ -97,6 +119,30 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const submitting = ref(false)
 
+const allTimeSlots = []
+for (let h = 7; h <= 18; h++) {
+  allTimeSlots.push(`${String(h).padStart(2, '0')}:00`)
+  if (h < 18) {
+    allTimeSlots.push(`${String(h).padStart(2, '0')}:30`)
+  }
+}
+allTimeSlots.push('18:00')
+
+const morningTimes = allTimeSlots.filter(t => {
+  const h = parseInt(t.split(':')[0])
+  return h >= 7 && h < 12
+})
+
+const afternoonTimes = allTimeSlots.filter(t => {
+  const h = parseInt(t.split(':')[0])
+  return h >= 13 && h <= 18
+})
+
+const morningStartTimes = computed(() => morningTimes.slice(0, -1))
+const afternoonStartTimes = computed(() => afternoonTimes.slice(0, -1))
+const morningEndTimes = computed(() => morningTimes.slice(1))
+const afternoonEndTimes = computed(() => afternoonTimes.slice(1))
+
 const form = ref({
   id: null,
   scheduleDate: '',
@@ -106,12 +152,6 @@ const form = ref({
   statusActive: true
 })
 
-const timeSlots = [
-  '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
-  '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
-  '18:00', '19:00', '20:00', '21:00', '22:00'
-]
-
 function formatDate(date) {
   if (!date) return ''
   const d = new Date(date)
@@ -119,6 +159,34 @@ function formatDate(date) {
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+function timeToMinutes(time) {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
+}
+
+function isValidEndTime(endTime) {
+  if (!form.value.startTime) return false
+  
+  const startMinutes = timeToMinutes(form.value.startTime)
+  const endMinutes = timeToMinutes(endTime)
+  
+  if (endMinutes <= startMinutes) return false
+  
+  const duration = (endMinutes - startMinutes) / 60
+  return duration >= 2
+}
+
+function calculateDuration() {
+  if (!form.value.startTime || !form.value.endTime) return 0
+  const start = timeToMinutes(form.value.startTime)
+  const end = timeToMinutes(form.value.endTime)
+  return (end - start) / 60
+}
+
+function onStartTimeChange() {
+  form.value.endTime = ''
 }
 
 async function loadSchedules() {
@@ -167,6 +235,12 @@ function openEditDialog(row) {
 async function submitForm() {
   if (!form.value.scheduleDate || !form.value.startTime || !form.value.endTime) {
     ElMessage.warning('请填写完整信息')
+    return
+  }
+
+  const duration = calculateDuration()
+  if (duration < 2) {
+    ElMessage.warning('排班时长最少2小时')
     return
   }
 
@@ -347,6 +421,19 @@ onMounted(() => {
 .action-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(79, 140, 255, 0.2);
+}
+
+.duration-info {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  padding: 8px 12px;
+  background: rgba(79, 140, 255, 0.2);
+  border-radius: 6px;
+}
+
+.duration-info.warning {
+  background: rgba(230, 162, 60, 0.2);
+  color: #e6a23c;
 }
 
 .animate-in {

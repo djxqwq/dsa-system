@@ -6,7 +6,7 @@
           <el-icon class="head-icon"><Calendar /></el-icon>
         </div>
         <div class="h">练车预约</div>
-        <div class="s">选择教练与时间段，提交后等待确认</div>
+        <div class="s">选择教练与时间段，半小时一段，最少一小时起约</div>
       </div>
 
       <el-form :model="form" label-width="96px" class="form">
@@ -36,15 +36,26 @@
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
-            <el-form-item label="时间段">
-              <el-select v-model="form.scheduleId" placeholder="请先选择日期" style="width: 100%" @change="onSlotChange">
-                <el-option 
-                  v-for="slot in availableSlots" 
-                  :key="slot.id" 
-                  :label="`${slot.startTime}-${slot.endTime} (${slot.coachName}，剩余${slot.remainingCapacity}位)`" 
-                  :value="slot.id"
-                  :disabled="slot.remainingCapacity <= 0"
-                />
+            <el-form-item label="开始时间">
+              <el-select v-model="form.startTime" placeholder="请先选择日期和教练" style="width: 100%" @change="onStartTimeChange">
+                <el-option-group label="上午">
+                  <el-option v-for="t in morningStartTimes" :key="t" :label="t" :value="t" :disabled="!isTimeAvailable(t)" />
+                </el-option-group>
+                <el-option-group label="下午">
+                  <el-option v-for="t in afternoonStartTimes" :key="t" :label="t" :value="t" :disabled="!isTimeAvailable(t)" />
+                </el-option-group>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="结束时间">
+              <el-select v-model="form.endTime" placeholder="请先选择开始时间" style="width: 100%">
+                <el-option-group label="上午">
+                  <el-option v-for="t in morningEndTimes" :key="t" :label="t" :value="t" :disabled="!isValidEndTime(t)" />
+                </el-option-group>
+                <el-option-group label="下午">
+                  <el-option v-for="t in afternoonEndTimes" :key="t" :label="t" :value="t" :disabled="!isValidEndTime(t)" />
+                </el-option-group>
               </el-select>
             </el-form-item>
           </el-col>
@@ -58,6 +69,16 @@
                   :value="vehicle.id" 
                 />
               </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="预约时长">
+              <div class="duration-info" v-if="form.startTime && form.endTime">
+                {{ calculateDuration() }} 小时
+              </div>
+              <div class="duration-info warning" v-else-if="form.startTime">
+                请选择结束时间（至少1小时）
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -128,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Calendar, Check, Refresh, List, Close } from '@element-plus/icons-vue'
 import { scheduleApi, appointmentApi, coachApi, vehicleApi } from '../../api'
@@ -136,7 +157,8 @@ import { scheduleApi, appointmentApi, coachApi, vehicleApi } from '../../api'
 const form = ref({
   date: '',
   coachId: null,
-  scheduleId: null,
+  startTime: '',
+  endTime: '',
   vehicleId: null,
   remark: ''
 })
@@ -155,6 +177,30 @@ const statusMap = {
   3: { text: '已取消', type: 'danger' },
   4: { text: '爽约', type: 'danger' }
 }
+
+const allTimeSlots = []
+for (let h = 7; h <= 18; h++) {
+  allTimeSlots.push(`${String(h).padStart(2, '0')}:00`)
+  if (h < 18) {
+    allTimeSlots.push(`${String(h).padStart(2, '0')}:30`)
+  }
+}
+allTimeSlots.push('18:00')
+
+const morningTimes = allTimeSlots.filter(t => {
+  const h = parseInt(t.split(':')[0])
+  return h >= 7 && h < 12
+})
+
+const afternoonTimes = allTimeSlots.filter(t => {
+  const h = parseInt(t.split(':')[0])
+  return h >= 13 && h <= 18
+})
+
+const morningStartTimes = computed(() => morningTimes.slice(0, -1))
+const afternoonStartTimes = computed(() => afternoonTimes.slice(0, -1))
+const morningEndTimes = computed(() => morningTimes.slice(1))
+const afternoonEndTimes = computed(() => afternoonTimes.slice(1))
 
 function getStatusText(status) {
   return statusMap[status]?.text || '未知'
@@ -177,6 +223,69 @@ function disabledDate(date) {
   return date < new Date(new Date().setHours(0, 0, 0, 0))
 }
 
+function timeToMinutes(time) {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
+}
+
+function minutesToTime(minutes) {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+function isTimeAvailable(time) {
+  if (!availableSlots.value.length) return false
+  
+  const minutes = timeToMinutes(time)
+  
+  for (const slot of availableSlots.value) {
+    const slotStart = timeToMinutes(slot.startTime)
+    const slotEnd = timeToMinutes(slot.endTime)
+    
+    if (minutes >= slotStart && minutes < slotEnd && slot.remainingCapacity > 0) {
+      return true
+    }
+  }
+  return false
+}
+
+function isValidEndTime(endTime) {
+  if (!form.value.startTime) return false
+  
+  const startMinutes = timeToMinutes(form.value.startTime)
+  const endMinutes = timeToMinutes(endTime)
+  
+  if (endMinutes <= startMinutes) return false
+  
+  const duration = (endMinutes - startMinutes) / 60
+  if (duration < 1) return false
+  
+  for (let m = startMinutes; m < endMinutes; m += 30) {
+    const slotStart = Math.floor(m / 60) * 60
+    const slotEnd = slotStart + 60
+    const slotKey = `${minutesToTime(slotStart)}-${minutesToTime(slotEnd)}`
+    
+    const slot = availableSlots.value.find(s => 
+      timeToMinutes(s.startTime) === slotStart && 
+      timeToMinutes(s.endTime) === slotEnd
+    )
+    
+    if (!slot || slot.remainingCapacity <= 0) {
+      return false
+    }
+  }
+  
+  return true
+}
+
+function calculateDuration() {
+  if (!form.value.startTime || !form.value.endTime) return 0
+  const start = timeToMinutes(form.value.startTime)
+  const end = timeToMinutes(form.value.endTime)
+  return (end - start) / 60
+}
+
 async function loadCoaches() {
   try {
     const res = await coachApi.getAll()
@@ -195,7 +304,8 @@ async function loadCoaches() {
 }
 
 async function onDateChange() {
-  form.value.scheduleId = null
+  form.value.startTime = ''
+  form.value.endTime = ''
   availableSlots.value = []
   if (!form.value.date) return
 
@@ -218,7 +328,8 @@ async function onDateChange() {
 }
 
 async function onCoachChange() {
-  form.value.scheduleId = null
+  form.value.startTime = ''
+  form.value.endTime = ''
   form.value.vehicleId = null
   vehicles.value = []
 
@@ -242,32 +353,35 @@ async function loadVehicles(coachId) {
   }
 }
 
-function onSlotChange() {
-  const slot = availableSlots.value.find(s => s.id === form.value.scheduleId)
-  if (slot && !form.value.coachId) {
-    form.value.coachId = slot.coachId
-    loadVehicles(slot.coachId)
-  }
+function onStartTimeChange() {
+  form.value.endTime = ''
 }
 
 async function onSubmit() {
-  if (!form.value.date || !form.value.scheduleId) {
-    ElMessage.warning('请选择日期和时间段')
+  if (!form.value.date || !form.value.startTime || !form.value.endTime) {
+    ElMessage.warning('请选择日期、开始时间和结束时间')
     return
   }
 
-  const slot = availableSlots.value.find(s => s.id === form.value.scheduleId)
-  if (!slot) {
-    ElMessage.warning('请选择有效的时段')
+  const duration = calculateDuration()
+  if (duration < 1) {
+    ElMessage.warning('预约时长最少1小时')
+    return
+  }
+
+  if (!form.value.coachId) {
+    ElMessage.warning('请选择教练')
     return
   }
 
   submitting.value = true
   try {
     const data = {
-      scheduleId: form.value.scheduleId,
-      coachId: slot.coachId,
+      coachId: form.value.coachId,
       vehicleId: form.value.vehicleId,
+      appointmentDate: formatDate(form.value.date),
+      startTime: form.value.startTime,
+      endTime: form.value.endTime,
       remark: form.value.remark
     }
 
@@ -290,7 +404,8 @@ function onReset() {
   form.value = {
     date: '',
     coachId: null,
-    scheduleId: null,
+    startTime: '',
+    endTime: '',
     vehicleId: null,
     remark: ''
   }
@@ -397,6 +512,19 @@ onMounted(() => {
 .form :deep(.el-select__wrapper:hover),
 .form :deep(.el-date-editor:hover) {
   border-color: var(--app-primary-light);
+}
+
+.duration-info {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  padding: 8px 12px;
+  background: rgba(79, 140, 255, 0.2);
+  border-radius: 6px;
+}
+
+.duration-info.warning {
+  background: rgba(230, 162, 60, 0.2);
+  color: #e6a23c;
 }
 
 .table :deep(.el-table) {
