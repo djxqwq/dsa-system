@@ -373,6 +373,7 @@ async function loadVehicles(coachId) {
     const res = await vehicleApi.getList('', 1, 100)
     if (res.data.code === 200) {
       let allVehicles = res.data.data?.records || res.data.data || []
+      allVehicles = allVehicles.filter(v => v.status === 1)
       if (studentCarType.value) {
         vehicles.value = allVehicles.filter(v => v.vehicleType === studentCarType.value)
       } else {
