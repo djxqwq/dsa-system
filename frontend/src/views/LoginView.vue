@@ -41,10 +41,10 @@
             </el-button>
           </div>
           <div class="dev-row">
-            <el-button type="warning" plain size="small" :loading="devStudentLoginLoading" @click="devStudentLogin">
+            <el-button type="warning" plain size="small" :loading="devStudentLoginLoading" @click="openStudentDialog">
               开发：一键学员登录
             </el-button>
-            <el-button type="primary" plain size="small" :loading="devCoachLoginLoading" @click="devCoachLogin">
+            <el-button type="primary" plain size="small" :loading="devCoachLoginLoading" @click="openCoachDialog">
               开发：一键教练登录
             </el-button>
           </div>
@@ -58,6 +58,50 @@
       </el-form>
     </div>
 
+    <el-dialog v-model="studentDialogVisible" title="选择学员" width="400px" :close-on-click-modal="false">
+      <div v-if="studentListLoading" class="dialog-loading">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>加载中...</span>
+      </div>
+      <div v-else-if="studentList.length === 0" class="dialog-empty">暂无可用学员账号</div>
+      <div v-else class="user-list">
+        <div
+          v-for="student in studentList"
+          :key="student.id"
+          class="user-item"
+          @click="onSelectStudent(student.id)"
+        >
+          <div class="user-name">{{ student.userName || '未命名' }}</div>
+          <div class="user-info">
+            <span>{{ student.mobile }}</span>
+            <span v-if="student.carType" class="car-type">{{ student.carType }}</span>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="coachDialogVisible" title="选择教练" width="400px" :close-on-click-modal="false">
+      <div v-if="coachListLoading" class="dialog-loading">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>加载中...</span>
+      </div>
+      <div v-else-if="coachList.length === 0" class="dialog-empty">暂无可用教练账号</div>
+      <div v-else class="user-list">
+        <div
+          v-for="coach in coachList"
+          :key="coach.id"
+          class="user-item"
+          @click="onSelectCoach(coach.id)"
+        >
+          <div class="user-name">{{ coach.name || '未命名' }}</div>
+          <div class="user-info">
+            <span>{{ coach.mobile }}</span>
+            <span v-if="coach.coachNo" class="coach-no">{{ coach.coachNo }}</span>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+
     <div class="bg-grid"></div>
   </div>
 </template>
@@ -66,6 +110,7 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import http from '../api/http'
 
@@ -78,6 +123,15 @@ const isDev = import.meta.env.DEV
 const devLoginLoading = ref(false)
 const devStudentLoginLoading = ref(false)
 const devCoachLoginLoading = ref(false)
+
+const studentDialogVisible = ref(false)
+const coachDialogVisible = ref(false)
+const studentList = ref([])
+const coachList = ref([])
+const studentListLoading = ref(false)
+const coachListLoading = ref(false)
+const selectedStudentId = ref(null)
+const selectedCoachId = ref(null)
 
 const form = reactive({
   role: 'student',
@@ -208,6 +262,52 @@ async function onLogin() {
 
 const DEV_ADMIN_SECRET = 'dev-admin-2025'
 
+async function openStudentDialog() {
+  studentDialogVisible.value = true
+  studentListLoading.value = true
+  studentList.value = []
+  try {
+    const res = await http.get('/api/user/dev/students', { params: { secret: DEV_ADMIN_SECRET } })
+    if (res?.data?.code === 200) {
+      studentList.value = res.data.data || []
+    } else {
+      ElMessage.error(res?.data?.msg || '获取学员列表失败')
+    }
+  } catch (e) {
+    ElMessage.error('获取学员列表失败')
+  } finally {
+    studentListLoading.value = false
+  }
+}
+
+async function openCoachDialog() {
+  coachDialogVisible.value = true
+  coachListLoading.value = true
+  coachList.value = []
+  try {
+    const res = await http.get('/api/user/dev/coaches', { params: { secret: DEV_ADMIN_SECRET } })
+    if (res?.data?.code === 200) {
+      coachList.value = res.data.data || []
+    } else {
+      ElMessage.error(res?.data?.msg || '获取教练列表失败')
+    }
+  } catch (e) {
+    ElMessage.error('获取教练列表失败')
+  } finally {
+    coachListLoading.value = false
+  }
+}
+
+function onSelectStudent(studentId) {
+  selectedStudentId.value = studentId
+  devStudentLogin()
+}
+
+function onSelectCoach(coachId) {
+  selectedCoachId.value = coachId
+  devCoachLogin()
+}
+
 async function devAdminLogin() {
   devLoginLoading.value = true
   try {
@@ -252,7 +352,10 @@ async function devAdminLogin() {
 async function devStudentLogin() {
   devStudentLoginLoading.value = true
   try {
-    const res = await http.post('/api/user/student/dev-login', { secret: DEV_ADMIN_SECRET })
+    const res = await http.post('/api/user/student/dev-login', { 
+      secret: DEV_ADMIN_SECRET,
+      studentId: selectedStudentId.value 
+    })
     const code = res?.data?.code
     const ok = code === 200 || code === '200'
     if (!ok) {
@@ -277,6 +380,7 @@ async function devStudentLogin() {
       },
     })
     ElMessage.success('已以学员身份进入')
+    studentDialogVisible.value = false
     router.replace(auth.homePath)
   } catch (e) {
     const status = e?.response?.status
@@ -293,7 +397,10 @@ async function devStudentLogin() {
 async function devCoachLogin() {
   devCoachLoginLoading.value = true
   try {
-    const res = await http.post('/api/user/coach/dev-login', { secret: DEV_ADMIN_SECRET })
+    const res = await http.post('/api/user/coach/dev-login', { 
+      secret: DEV_ADMIN_SECRET,
+      coachId: selectedCoachId.value 
+    })
     const code = res?.data?.code
     const ok = code === 200 || code === '200'
     if (!ok) {
@@ -318,6 +425,7 @@ async function devCoachLogin() {
       },
     })
     ElMessage.success('已以教练身份进入')
+    coachDialogVisible.value = false
     router.replace(auth.homePath)
   } catch (e) {
     const status = e?.response?.status
@@ -480,5 +588,64 @@ onMounted(refreshCaptcha)
   background-size: 32px 32px;
   mask-image: radial-gradient(circle at center, black 40%, transparent 70%);
   opacity: 0.35;
+}
+
+.dialog-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px;
+  color: #666;
+}
+
+.dialog-empty {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.user-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.user-item {
+  padding: 12px 16px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.user-item:hover {
+  border-color: #409eff;
+  background-color: #f5f7fa;
+}
+
+.user-item:last-child {
+  margin-bottom: 0;
+}
+
+.user-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 4px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.car-type, .coach-no {
+  background: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 </style>
