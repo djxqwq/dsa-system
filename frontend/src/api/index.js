@@ -42,6 +42,10 @@ export const appointmentApi = {
     return http.put(`/api/appointment/confirm/${id}`)
   },
 
+  rejectAppointment(id) {
+    return http.put(`/api/appointment/reject/${id}`)
+  },
+
   completeAppointment(id) {
     return http.put(`/api/appointment/complete/${id}`)
   },

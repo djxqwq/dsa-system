@@ -12,6 +12,8 @@ public interface AppointmentService {
 
     ResultDTO<?> confirmAppointment(Long id, Long coachId);
 
+    ResultDTO<?> rejectAppointment(Long id, Long coachId);
+
     ResultDTO<?> completeAppointment(Long id, Long coachId);
 
     ResultDTO<?> markNoShow(Long id, Long coachId);

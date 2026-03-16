@@ -16,6 +16,7 @@
           <el-option label="已完成" :value="2" />
           <el-option label="已取消" :value="3" />
           <el-option label="爽约" :value="4" />
+          <el-option label="已拒绝" :value="5" />
         </el-select>
         <el-button type="primary" plain @click="loadAppointments">
           <el-icon><Refresh /></el-icon>
@@ -55,7 +56,7 @@
                 <el-icon><Check /></el-icon>
                 确认
               </el-button>
-              <el-button size="small" type="danger" plain @click="cancelAppointment(scope.row)">
+              <el-button size="small" type="danger" plain @click="rejectAppointment(scope.row)">
                 <el-icon><Close /></el-icon>
                 拒绝
               </el-button>
@@ -93,7 +94,8 @@ const statusMap = {
   1: { text: '已确认', type: 'success' },
   2: { text: '已完成', type: 'info' },
   3: { text: '已取消', type: 'danger' },
-  4: { text: '爽约', type: 'danger' }
+  4: { text: '爽约', type: 'danger' },
+  5: { text: '已拒绝', type: 'danger' }
 }
 
 function getStatusText(status) {
@@ -134,10 +136,10 @@ async function confirmAppointment(row) {
   }
 }
 
-async function cancelAppointment(row) {
+async function rejectAppointment(row) {
   try {
     await ElMessageBox.confirm('确定要拒绝该预约吗？', '提示', { type: 'warning' })
-    const res = await appointmentApi.cancelAppointment(row.id)
+    const res = await appointmentApi.rejectAppointment(row.id)
     if (res.data.code === 200) {
       ElMessage.success('已拒绝预约')
       loadAppointments()

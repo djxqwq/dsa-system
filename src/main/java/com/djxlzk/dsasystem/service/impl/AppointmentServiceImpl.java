@@ -194,6 +194,27 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     @Transactional
+    public ResultDTO<?> rejectAppointment(Long id, Long coachId) {
+        Appointment appointment = appointmentMapper.selectById(id);
+        if (appointment == null) {
+            return ResultDTO.error(404, "预约不存在");
+        }
+
+        if (!appointment.getCoachId().equals(coachId)) {
+            return ResultDTO.error(403, "无权操作此预约");
+        }
+
+        if (appointment.getStatus() != 0) {
+            return ResultDTO.error(400, "只能拒绝待确认状态的预约");
+        }
+
+        appointment.setStatus(5);
+        appointmentMapper.updateById(appointment);
+        return ResultDTO.success("预约已拒绝", null);
+    }
+
+    @Override
+    @Transactional
     public ResultDTO<?> completeAppointment(Long id, Long coachId) {
         Appointment appointment = appointmentMapper.selectById(id);
         if (appointment == null) {

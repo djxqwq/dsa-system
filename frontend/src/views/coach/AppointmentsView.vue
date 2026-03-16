@@ -16,6 +16,7 @@
           <el-option label="已完成" :value="2" />
           <el-option label="已取消" :value="3" />
           <el-option label="爽约" :value="4" />
+          <el-option label="已拒绝" :value="5" />
         </el-select>
         <el-date-picker
           v-model="filterDate"
@@ -89,6 +90,10 @@
           <span class="stat-label">爽约</span>
           <span class="stat-value warning">{{ noShowCount }}</span>
         </div>
+        <div class="stat-item">
+          <span class="stat-label">已拒绝</span>
+          <span class="stat-value danger">{{ rejectedCount }}</span>
+        </div>
       </div>
     </div>
 
@@ -145,7 +150,8 @@ const statusMap = {
   1: { text: '已确认', type: 'success' },
   2: { text: '已完成', type: 'info' },
   3: { text: '已取消', type: 'danger' },
-  4: { text: '爽约', type: 'danger' }
+  4: { text: '爽约', type: 'danger' },
+  5: { text: '已拒绝', type: 'danger' }
 }
 
 function getStatusText(status) {
@@ -159,6 +165,7 @@ function getStatusType(status) {
 const completedCount = computed(() => appointments.value.filter(a => a.status === 2).length)
 const cancelledCount = computed(() => appointments.value.filter(a => a.status === 3).length)
 const noShowCount = computed(() => appointments.value.filter(a => a.status === 4).length)
+const rejectedCount = computed(() => appointments.value.filter(a => a.status === 5).length)
 
 async function loadAppointments() {
   loading.value = true

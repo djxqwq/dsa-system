@@ -33,6 +33,12 @@ public class AppointmentController {
         return appointmentService.confirmAppointment(id, coachId);
     }
 
+    @PutMapping("/reject/{id}")
+    public ResultDTO<?> rejectAppointment(@PathVariable Long id, Authentication auth) {
+        Long coachId = (Long) auth.getPrincipal();
+        return appointmentService.rejectAppointment(id, coachId);
+    }
+
     @PutMapping("/complete/{id}")
     public ResultDTO<?> completeAppointment(@PathVariable Long id, Authentication auth) {
         Long coachId = (Long) auth.getPrincipal();

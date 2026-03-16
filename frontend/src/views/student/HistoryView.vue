@@ -73,7 +73,8 @@ const statusMap = {
   1: { text: '已确认', type: 'success' },
   2: { text: '已完成', type: 'info' },
   3: { text: '已取消', type: 'danger' },
-  4: { text: '爽约', type: 'danger' }
+  4: { text: '爽约', type: 'danger' },
+  5: { text: '已拒绝', type: 'danger' }
 }
 
 function getStatusText(status) {
