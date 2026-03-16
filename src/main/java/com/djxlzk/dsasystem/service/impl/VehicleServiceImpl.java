@@ -135,4 +135,15 @@ public class VehicleServiceImpl implements VehicleService {
         String msg = status == 1 ? "已启用" : (status == 2 ? "已设为维修中" : "已停用");
         return ResultDTO.success(msg);
     }
+
+    @Override
+    public List<Vehicle> findAllWithCoachName() {
+        return vehicleMapper.findAllWithCoachName();
+    }
+
+    
+    @Override
+    public List<Vehicle> findByCarType(String carType) {
+        return vehicleMapper.findByCarTypeWithCoachName(carType);
+    }
 }

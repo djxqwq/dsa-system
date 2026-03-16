@@ -44,4 +44,9 @@ public class VehicleController {
     public ResultDTO<?> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
         return vehicleService.updateStatus(id, status);
     }
+
+    @GetMapping("/all")
+    public ResultDTO<?> getAllVehicles() {
+        return vehicleService.findAllWithCoachName();
+    }
 }

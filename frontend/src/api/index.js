@@ -65,6 +65,10 @@ export const appointmentApi = {
 
   getActiveAppointments() {
     return http.get('/api/appointment/active')
+  },
+
+  getProfile() {
+    return http.get('/api/user/student/profile')
   }
 }
 
@@ -81,5 +85,9 @@ export const vehicleApi = {
     params.append('page', page || 1)
     params.append('size', size || 100)
     return http.get(`/api/vehicle/list?${params}`)
+  },
+
+  getAll() {
+    return http.get('/api/vehicle/all')
   }
 }

@@ -24,7 +24,7 @@
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
-            <el-form-item label="教练">
+            <el-form-item label="负责教练">
               <el-select v-model="form.coachId" placeholder="请选择教练" style="width: 100%" @change="onCoachChange" clearable>
                 <el-option 
                   v-for="coach in coaches" 
@@ -169,6 +169,7 @@ const vehicles = ref([])
 const appointments = ref([])
 const submitting = ref(false)
 const loadingAppointments = ref(false)
+const studentCarType = ref('')
 
 const statusMap = {
   0: { text: '待确认', type: 'warning' },
@@ -357,7 +358,7 @@ async function onCoachChange() {
   form.value.endTime = ''
   form.value.vehicleId = null
   vehicles.value = []
-
+  
   if (form.value.coachId) {
     await loadVehicles(form.value.coachId)
   }
@@ -371,7 +372,12 @@ async function loadVehicles(coachId) {
   try {
     const res = await vehicleApi.getList('', 1, 100)
     if (res.data.code === 200) {
-      vehicles.value = (res.data.data?.records || res.data.data || []).filter(v => v.coachId === coachId)
+      let allVehicles = res.data.data?.records || res.data.data || []
+      if (studentCarType.value) {
+        vehicles.value = allVehicles.filter(v => v.vehicleType === studentCarType.value)
+      } else {
+        vehicles.value = allVehicles
+      }
     }
   } catch (e) {
     console.error('加载车辆列表失败', e)
@@ -469,7 +475,19 @@ async function cancelAppointment(row) {
   }
 }
 
-onMounted(() => {
+async function loadStudentProfile() {
+  try {
+    const res = await appointmentApi.getProfile()
+    if (res.data.code === 200) {
+      studentCarType.value = res.data.data?.carType || ''
+    }
+  } catch (e) {
+    console.error('加载学员信息失败', e)
+  }
+}
+
+onMounted(async () => {
+  await loadStudentProfile()
   loadCoaches()
   loadAppointments()
 })
