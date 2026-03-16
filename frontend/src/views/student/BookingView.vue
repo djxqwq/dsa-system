@@ -223,8 +223,14 @@ function disabledDate(date) {
   return date < new Date(new Date().setHours(0, 0, 0, 0))
 }
 
+function formatTime(time) {
+  if (!time) return ''
+  return time.substring(0, 5)
+}
+
 function timeToMinutes(time) {
-  const [h, m] = time.split(':').map(Number)
+  const formatted = formatTime(time)
+  const [h, m] = formatted.split(':').map(Number)
   return h * 60 + m
 }
 
@@ -242,8 +248,9 @@ function isTimeAvailable(time) {
   for (const slot of availableSlots.value) {
     const slotStart = timeToMinutes(slot.startTime)
     const slotEnd = timeToMinutes(slot.endTime)
+    const remaining = slot.remainingCapacity != null ? slot.remainingCapacity : (slot.capacity - slot.bookedCount)
     
-    if (minutes >= slotStart && minutes < slotEnd && slot.remainingCapacity > 0) {
+    if (minutes >= slotStart && minutes < slotEnd && remaining > 0) {
       return true
     }
   }
@@ -261,22 +268,17 @@ function isValidEndTime(endTime) {
   const duration = (endMinutes - startMinutes) / 60
   if (duration < 1) return false
   
-  for (let m = startMinutes; m < endMinutes; m += 30) {
-    const slotStart = Math.floor(m / 60) * 60
-    const slotEnd = slotStart + 60
-    const slotKey = `${minutesToTime(slotStart)}-${minutesToTime(slotEnd)}`
+  for (const slot of availableSlots.value) {
+    const slotStart = timeToMinutes(slot.startTime)
+    const slotEnd = timeToMinutes(slot.endTime)
+    const remaining = slot.remainingCapacity != null ? slot.remainingCapacity : (slot.capacity - slot.bookedCount)
     
-    const slot = availableSlots.value.find(s => 
-      timeToMinutes(s.startTime) === slotStart && 
-      timeToMinutes(s.endTime) === slotEnd
-    )
-    
-    if (!slot || slot.remainingCapacity <= 0) {
-      return false
+    if (startMinutes >= slotStart && endMinutes <= slotEnd && remaining > 0) {
+      return true
     }
   }
   
-  return true
+  return false
 }
 
 function calculateDuration() {

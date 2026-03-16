@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS `schedule` (
 -- 预约表
 CREATE TABLE IF NOT EXISTS `appointment` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `schedule_id` BIGINT NOT NULL COMMENT '排班ID',
   `student_id` BIGINT NOT NULL COMMENT '学员ID',
   `coach_id` BIGINT NOT NULL COMMENT '教练ID',
   `vehicle_id` BIGINT DEFAULT NULL COMMENT '车辆ID',
@@ -31,7 +30,6 @@ CREATE TABLE IF NOT EXISTS `appointment` (
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_schedule_student` (`schedule_id`, `student_id`),
   KEY `idx_student` (`student_id`),
   KEY `idx_coach` (`coach_id`),
   KEY `idx_date` (`appointment_date`),

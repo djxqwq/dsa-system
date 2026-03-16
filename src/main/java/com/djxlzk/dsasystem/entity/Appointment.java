@@ -17,9 +17,6 @@ public class Appointment {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @TableField("schedule_id")
-    private Long scheduleId;
-
     @TableField("student_id")
     private Long studentId;
 
