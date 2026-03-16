@@ -10,34 +10,46 @@
       </div>
 
       <div class="tools">
-        <el-date-picker v-model="date" type="date" placeholder="选择日期" class="tool-item" />
-        <el-button type="primary" plain @click="addSlot" class="tool-item">
+        <el-date-picker v-model="filterDate" type="date" placeholder="选择日期" class="tool-item" @change="loadSchedules" />
+        <el-button type="primary" plain @click="openAddDialog" class="tool-item">
           <el-icon><Plus /></el-icon>
           新增时段
         </el-button>
       </div>
 
-      <el-table :data="rows" style="width: 100%" class="table">
-        <el-table-column prop="date" label="日期" width="120" />
-        <el-table-column prop="slot" label="时间段" width="160" />
-        <el-table-column prop="capacity" label="可约名额" width="120" />
+      <el-table :data="schedules" style="width: 100%" class="table" v-loading="loading">
+        <el-table-column prop="scheduleDate" label="日期" width="120" />
+        <el-table-column label="时间段" width="160">
+          <template #default="scope">
+            {{ scope.row.startTime }} - {{ scope.row.endTime }}
+          </template>
+        </el-table-column>
+        <el-table-column label="名额" width="120">
+          <template #default="scope">
+            {{ scope.row.bookedCount }} / {{ scope.row.capacity }}
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="120">
           <template #default="scope">
-            <el-tag :type="scope.row.enabled ? 'success' : 'info'" effect="dark" class="status-tag">
-              <el-icon v-if="scope.row.enabled"><Check /></el-icon>
+            <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" effect="dark" class="status-tag">
+              <el-icon v-if="scope.row.status === 1"><Check /></el-icon>
               <el-icon v-else><Close /></el-icon>
-              {{ scope.row.enabled ? '开放' : '关闭' }}
+              {{ scope.row.status === 1 ? '开放' : '关闭' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="180">
+        <el-table-column label="操作" min-width="200">
           <template #default="scope">
-            <el-button size="small" type="primary" plain @click="toggle(scope.row)" class="action-btn">
-              <el-icon v-if="scope.row.enabled"><Close /></el-icon>
+            <el-button size="small" type="primary" plain @click="toggleStatus(scope.row)" class="action-btn">
+              <el-icon v-if="scope.row.status === 1"><Close /></el-icon>
               <el-icon v-else><Check /></el-icon>
-              {{ scope.row.enabled ? '关闭' : '开放' }}
+              {{ scope.row.status === 1 ? '关闭' : '开放' }}
             </el-button>
-            <el-button size="small" type="danger" plain @click="remove(scope.$index)" class="action-btn">
+            <el-button size="small" type="warning" plain @click="openEditDialog(scope.row)" class="action-btn">
+              <el-icon><Edit /></el-icon>
+              编辑
+            </el-button>
+            <el-button size="small" type="danger" plain @click="deleteSchedule(scope.row)" class="action-btn" :disabled="scope.row.bookedCount > 0">
               <el-icon><Delete /></el-icon>
               删除
             </el-button>
@@ -45,32 +57,190 @@
         </el-table-column>
       </el-table>
     </div>
+
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑时段' : '新增时段'" width="400px">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="日期">
+          <el-date-picker v-model="form.scheduleDate" type="date" placeholder="选择日期" style="width: 100%" :disabled="isEdit" />
+        </el-form-item>
+        <el-form-item label="开始时间">
+          <el-time-select v-model="form.startTime" placeholder="选择开始时间" :max-time="form.endTime" style="width: 100%" start="06:00" step="01:00" end="22:00" />
+        </el-form-item>
+        <el-form-item label="结束时间">
+          <el-time-select v-model="form.endTime" placeholder="选择结束时间" :min-time="form.startTime" style="width: 100%" start="06:00" step="01:00" end="22:00" />
+        </el-form-item>
+        <el-form-item label="可约名额">
+          <el-input-number v-model="form.capacity" :min="1" :max="10" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-switch v-model="form.statusActive" active-text="开放" inactive-text="关闭" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitForm" :loading="submitting">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Calendar, Plus, Check, Close, Delete } from '@element-plus/icons-vue'
+import { ref, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Calendar, Plus, Check, Close, Delete, Edit } from '@element-plus/icons-vue'
+import { scheduleApi } from '../../api'
 
-const date = ref('')
+const filterDate = ref('')
+const schedules = ref([])
+const loading = ref(false)
+const dialogVisible = ref(false)
+const isEdit = ref(false)
+const submitting = ref(false)
 
-const rows = ref([
-  { date: '2026-03-14', slot: '09:00-10:00', capacity: 1, enabled: true },
-  { date: '2026-03-14', slot: '10:00-11:00', capacity: 1, enabled: false },
-])
+const form = ref({
+  id: null,
+  scheduleDate: '',
+  startTime: '',
+  endTime: '',
+  capacity: 1,
+  statusActive: true
+})
 
-function addSlot() {
-  ElMessage.info('已新增时段（演示）')
+const timeSlots = [
+  '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+  '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+  '18:00', '19:00', '20:00', '21:00', '22:00'
+]
+
+function formatDate(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
-function toggle(row) {
-  row.enabled = !row.enabled
+async function loadSchedules() {
+  loading.value = true
+  try {
+    const startDate = filterDate.value ? formatDate(filterDate.value) : formatDate(new Date())
+    const res = await scheduleApi.getCoachSchedules(startDate)
+    if (res.data.code === 200) {
+      schedules.value = res.data.data || []
+    } else {
+      ElMessage.error(res.data.msg || '加载失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  } finally {
+    loading.value = false
+  }
 }
 
-function remove(idx) {
-  rows.value.splice(idx, 1)
+function openAddDialog() {
+  isEdit.value = false
+  form.value = {
+    id: null,
+    scheduleDate: filterDate.value || new Date(),
+    startTime: '',
+    endTime: '',
+    capacity: 1,
+    statusActive: true
+  }
+  dialogVisible.value = true
 }
+
+function openEditDialog(row) {
+  isEdit.value = true
+  form.value = {
+    id: row.id,
+    scheduleDate: row.scheduleDate,
+    startTime: row.startTime,
+    endTime: row.endTime,
+    capacity: row.capacity,
+    statusActive: row.status === 1
+  }
+  dialogVisible.value = true
+}
+
+async function submitForm() {
+  if (!form.value.scheduleDate || !form.value.startTime || !form.value.endTime) {
+    ElMessage.warning('请填写完整信息')
+    return
+  }
+
+  submitting.value = true
+  try {
+    const data = {
+      id: form.value.id,
+      scheduleDate: formatDate(form.value.scheduleDate),
+      startTime: form.value.startTime,
+      endTime: form.value.endTime,
+      capacity: form.value.capacity,
+      status: form.value.statusActive ? 1 : 0
+    }
+
+    let res
+    if (isEdit.value) {
+      res = await scheduleApi.updateSchedule(data)
+    } else {
+      res = await scheduleApi.createSchedule(data)
+    }
+
+    if (res.data.code === 200) {
+      ElMessage.success(isEdit.value ? '修改成功' : '新增成功')
+      dialogVisible.value = false
+      loadSchedules()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function toggleStatus(row) {
+  try {
+    const res = await scheduleApi.toggleStatus(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success(res.data.msg)
+      loadSchedules()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
+async function deleteSchedule(row) {
+  if (row.bookedCount > 0) {
+    ElMessage.warning('该时段已有预约，无法删除')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm('确定要删除该时段吗？', '提示', { type: 'warning' })
+    const res = await scheduleApi.deleteSchedule(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success('删除成功')
+      loadSchedules()
+    } else {
+      ElMessage.error(res.data.msg || '删除失败')
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('网络错误')
+    }
+  }
+}
+
+onMounted(() => {
+  loadSchedules()
+})
 </script>
 
 <style scoped>

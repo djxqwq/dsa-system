@@ -25,9 +25,13 @@ public class JwtConfig {
                 .authorizeRequests(authorize -> authorize
                         .antMatchers("/api/user/**").permitAll()
                         .antMatchers("/api/captcha/**").permitAll()
+                        .antMatchers("/api/coach/all").authenticated()
                         .antMatchers("/api/coach/**").hasRole("ADMIN")
                         .antMatchers("/api/student/**").hasRole("ADMIN")
+                        .antMatchers("/api/vehicle/list").authenticated()
                         .antMatchers("/api/vehicle/**").hasRole("ADMIN")
+                        .antMatchers("/api/schedule/**").authenticated()
+                        .antMatchers("/api/appointment/**").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
