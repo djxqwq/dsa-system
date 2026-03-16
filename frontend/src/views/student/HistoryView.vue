@@ -20,13 +20,17 @@
         <el-table-column prop="appointmentDate" label="日期" width="120" />
         <el-table-column label="时间段" width="140">
           <template #default="scope">
-            {{ scope.row.startTime }} - {{ scope.row.endTime }}
+            {{ formatTime(scope.row.startTime) }} - {{ formatTime(scope.row.endTime) }}
           </template>
         </el-table-column>
         <el-table-column prop="coachName" label="教练" width="100" />
-        <el-table-column prop="plateNumber" label="车辆" width="120">
+        <el-table-column label="车辆" width="150">
           <template #default="scope">
-            {{ scope.row.plateNumber || '未指定' }}
+            <span v-if="scope.row.plateNumber">
+              {{ scope.row.plateNumber }}
+              <el-tag size="small" type="info" style="margin-left: 4px">{{ scope.row.vehicleType }}</el-tag>
+            </span>
+            <span v-else>未指定</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
@@ -83,6 +87,11 @@ function getStatusText(status) {
 
 function getStatusType(status) {
   return statusMap[status]?.type || 'info'
+}
+
+function formatTime(time) {
+  if (!time) return ''
+  return time.substring(0, 5)
 }
 
 async function loadAppointments() {

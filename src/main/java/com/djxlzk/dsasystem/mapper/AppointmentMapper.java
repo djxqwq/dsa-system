@@ -13,7 +13,7 @@ import java.util.List;
 @Mapper
 public interface AppointmentMapper extends BaseMapper<Appointment> {
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number " +
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +
@@ -22,7 +22,7 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findByStudentId(@Param("studentId") Long studentId);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number " +
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +
@@ -31,7 +31,7 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findByCoachId(@Param("coachId") Long coachId);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number " +
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +
@@ -50,7 +50,7 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
         int countByDateAndTime(@Param("studentId") Long studentId, @Param("date") LocalDate date,
                         @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number " +
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +
@@ -58,7 +58,7 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "WHERE a.id = #{id}")
         Appointment findByIdWithDetails(@Param("id") Long id);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number " +
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +

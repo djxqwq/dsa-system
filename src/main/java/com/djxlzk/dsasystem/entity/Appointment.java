@@ -53,4 +53,7 @@ public class Appointment {
 
     @TableField(exist = false)
     private String plateNumber;
+
+    @TableField(exist = false)
+    private String vehicleType;
 }

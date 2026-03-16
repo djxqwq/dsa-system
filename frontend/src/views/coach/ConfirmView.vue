@@ -29,7 +29,7 @@
         <el-table-column prop="appointmentDate" label="日期" width="120" />
         <el-table-column label="时间段" width="140">
           <template #default="scope">
-            {{ scope.row.startTime }} - {{ scope.row.endTime }}
+            {{ formatTime(scope.row.startTime) }} - {{ formatTime(scope.row.endTime) }}
           </template>
         </el-table-column>
         <el-table-column prop="plateNumber" label="车辆" width="120">
@@ -104,6 +104,11 @@ function getStatusText(status) {
 
 function getStatusType(status) {
   return statusMap[status]?.type || 'info'
+}
+
+function formatTime(time) {
+  if (!time) return ''
+  return time.substring(0, 5)
 }
 
 async function loadAppointments() {

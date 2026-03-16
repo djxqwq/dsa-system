@@ -28,7 +28,10 @@
         <div class="user-line">
           <div class="avatar">{{ initials }}</div>
           <div class="user-meta">
-            <div class="user-name">{{ auth.profile.name }}</div>
+            <div class="user-name">
+              {{ auth.profile.name }}
+              <el-tag v-if="auth.role === 'student' && auth.profile.carType" size="small" type="success" style="margin-left: 6px">{{ auth.profile.carType }}</el-tag>
+            </div>
             <div class="user-role">{{ roleLabel }}</div>
           </div>
         </div>

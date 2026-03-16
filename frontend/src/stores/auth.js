@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', {
       profile: cached.profile || {
         name: cached.profile?.name || '未命名用户',
         mobile: cached.profile?.mobile || '',
+        carType: cached.profile?.carType || '',
       },
     }
   },

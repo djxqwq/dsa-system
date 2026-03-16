@@ -81,6 +81,7 @@ public class StudentServiceImpl implements StudentService {
         data.put("token", token);
         data.put("studentId", student.getId());
         data.put("userName", student.getUserName());
+        data.put("carType", student.getCarType());
         return ResultDTO.success("登录成功", data);
     }
 

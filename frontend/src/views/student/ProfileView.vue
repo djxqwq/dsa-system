@@ -122,6 +122,7 @@ async function onSave() {
       ElMessage.success('保存成功')
       authStore.profile.name = form.name
       authStore.profile.mobile = form.mobile
+      authStore.profile.carType = form.carType
       authStore.persist()
     } else {
       ElMessage.error(res.data.msg || '保存失败')

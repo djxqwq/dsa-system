@@ -242,6 +242,7 @@ async function onLogin() {
               ? data.name || '教练'
               : data.name || '管理员',
         mobile: form.mobile,
+        carType: data.carType,
       },
     })
 
@@ -377,6 +378,7 @@ async function devStudentLogin() {
       profile: {
         name: data.userName || '学员',
         mobile: data.mobile || '',
+        carType: data.carType,
       },
     })
     ElMessage.success('已以学员身份进入')

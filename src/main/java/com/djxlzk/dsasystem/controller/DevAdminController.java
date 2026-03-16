@@ -158,6 +158,7 @@ public class DevAdminController {
             data.put("studentId", id);
             data.put("userName", student.getUserName() != null ? student.getUserName() : "学员");
             data.put("mobile", student.getMobile());
+            data.put("carType", student.getCarType());
             return ResultDTO.success("登录成功", data);
         } catch (Exception e) {
             e.printStackTrace();

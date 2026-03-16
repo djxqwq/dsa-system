@@ -61,7 +61,7 @@
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="车辆">
-              <el-select v-model="form.vehicleId" placeholder="请选择车辆" style="width: 100%" clearable>
+              <el-select v-model="form.vehicleId" placeholder="非必填，可指定车辆" style="width: 100%" clearable>
                 <el-option 
                   v-for="vehicle in vehicles" 
                   :key="vehicle.id" 
@@ -113,7 +113,7 @@
         <el-table-column prop="appointmentDate" label="日期" width="120" />
         <el-table-column label="时间段" width="140">
           <template #default="scope">
-            {{ scope.row.startTime }} - {{ scope.row.endTime }}
+            {{ formatTime(scope.row.startTime) }} - {{ formatTime(scope.row.endTime) }}
           </template>
         </el-table-column>
         <el-table-column prop="coachName" label="教练" width="100" />

@@ -21,7 +21,7 @@
         <el-table-column prop="scheduleDate" label="日期" width="120" />
         <el-table-column label="时间段" width="160">
           <template #default="scope">
-            {{ scope.row.startTime }} - {{ scope.row.endTime }}
+            {{ formatTime(scope.row.startTime) }} - {{ formatTime(scope.row.endTime) }}
           </template>
         </el-table-column>
         <el-table-column label="学员" min-width="150">
@@ -206,6 +206,11 @@ function onStartTimeChange() {
   form.value.endTime = ''
 }
 
+function formatTime(time) {
+  if (!time) return ''
+  return time.substring(0, 5)
+}
+
 function dateSpanMethod({ row, column, rowIndex, columnIndex }) {
   if (columnIndex === 0) {
     const currentDate = row.scheduleDate
@@ -235,7 +240,7 @@ async function loadSchedules() {
       const data = res.data.data || []
       data.sort((a, b) => {
         if (a.scheduleDate !== b.scheduleDate) {
-          return a.scheduleDate.localeCompare(b.scheduleDate)
+          return b.scheduleDate.localeCompare(a.scheduleDate)
         }
         return a.startTime.localeCompare(b.startTime)
       })

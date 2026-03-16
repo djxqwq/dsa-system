@@ -66,15 +66,18 @@ public class VehicleServiceImpl implements VehicleService {
         if (exist == null) {
             return ResultDTO.error(400, "车辆不存在");
         }
-        if (StringUtils.hasText(vehicleDTO.getPlateNumber()) && !vehicleDTO.getPlateNumber().equals(exist.getPlateNumber())) {
+        if (StringUtils.hasText(vehicleDTO.getPlateNumber())
+                && !vehicleDTO.getPlateNumber().equals(exist.getPlateNumber())) {
             QueryWrapper<Vehicle> w = new QueryWrapper<>();
             w.eq("plate_number", vehicleDTO.getPlateNumber());
             if (vehicleMapper.selectCount(w) > 0) {
                 return ResultDTO.error(400, "该车牌号已被使用");
             }
         }
-        exist.setPlateNumber(vehicleDTO.getPlateNumber() != null ? vehicleDTO.getPlateNumber() : exist.getPlateNumber());
-        exist.setVehicleType(vehicleDTO.getVehicleType() != null ? vehicleDTO.getVehicleType() : exist.getVehicleType());
+        exist.setPlateNumber(
+                vehicleDTO.getPlateNumber() != null ? vehicleDTO.getPlateNumber() : exist.getPlateNumber());
+        exist.setVehicleType(
+                vehicleDTO.getVehicleType() != null ? vehicleDTO.getVehicleType() : exist.getVehicleType());
         exist.setCoachId(vehicleDTO.getCoachId());
         exist.setRemark(vehicleDTO.getRemark());
         if (vehicleDTO.getStatus() != null) {
@@ -100,7 +103,7 @@ public class VehicleServiceImpl implements VehicleService {
         }
         wrapper.orderByDesc("create_time");
         Page<Vehicle> result = vehicleMapper.selectPage(p, wrapper);
-        
+
         List<Vehicle> records = result.getRecords();
         Set<Long> coachIds = records.stream()
                 .map(Vehicle::getCoachId)
@@ -116,7 +119,7 @@ public class VehicleServiceImpl implements VehicleService {
                 }
             });
         }
-        
+
         Map<String, Object> data = new HashMap<>();
         data.put("records", records);
         data.put("total", result.getTotal());
@@ -141,7 +144,6 @@ public class VehicleServiceImpl implements VehicleService {
         return vehicleMapper.findAllWithCoachName();
     }
 
-    
     @Override
     public List<Vehicle> findByCarType(String carType) {
         return vehicleMapper.findByCarTypeWithCoachName(carType);
