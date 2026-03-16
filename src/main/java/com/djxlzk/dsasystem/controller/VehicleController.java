@@ -47,6 +47,6 @@ public class VehicleController {
 
     @GetMapping("/all")
     public ResultDTO<?> getAllVehicles() {
-        return vehicleService.findAllWithCoachName();
+        return ResultDTO.success(vehicleService.findAllWithCoachName());
     }
 }
