@@ -35,9 +35,19 @@
         </div>
 
         <div v-if="isDev" class="dev-entry">
-          <el-button type="success" plain size="small" :loading="devLoginLoading" @click="devAdminLogin">
-            开发：一键管理员登录
-          </el-button>
+          <div class="dev-row">
+            <el-button type="success" plain size="small" :loading="devLoginLoading" @click="devAdminLogin">
+              开发：一键管理员登录
+            </el-button>
+          </div>
+          <div class="dev-row">
+            <el-button type="warning" plain size="small" :loading="devStudentLoginLoading" @click="devStudentLogin">
+              开发：一键学员登录
+            </el-button>
+            <el-button type="primary" plain size="small" :loading="devCoachLoginLoading" @click="devCoachLogin">
+              开发：一键教练登录
+            </el-button>
+          </div>
         </div>
 
         <div class="tips">
@@ -66,6 +76,8 @@ const auth = useAuthStore()
 const formRef = ref()
 const isDev = import.meta.env.DEV
 const devLoginLoading = ref(false)
+const devStudentLoginLoading = ref(false)
+const devCoachLoginLoading = ref(false)
 
 const form = reactive({
   role: 'student',
@@ -237,6 +249,88 @@ async function devAdminLogin() {
   }
 }
 
+async function devStudentLogin() {
+  devStudentLoginLoading.value = true
+  try {
+    const res = await http.post('/api/user/student/dev-login', { secret: DEV_ADMIN_SECRET })
+    const code = res?.data?.code
+    const ok = code === 200 || code === '200'
+    if (!ok) {
+      const msg = res?.data?.msg || '一键登录失败'
+      console.error('[学员一键登录] 后端返回异常', res?.data)
+      ElMessage.error(msg)
+      return
+    }
+    const data = res.data.data || {}
+    const token = data.token || ''
+    if (!token) {
+      console.error('[学员一键登录] 未返回 token', res?.data)
+      ElMessage.error('登录失败：未返回 token')
+      return
+    }
+    auth.login({
+      token,
+      role: 'student',
+      profile: {
+        name: data.userName || '学员',
+        mobile: data.mobile || '',
+      },
+    })
+    ElMessage.success('已以学员身份进入')
+    router.replace(auth.homePath)
+  } catch (e) {
+    const status = e?.response?.status
+    const msg = e?.response?.data?.msg || e?.response?.data?.message
+    let show = msg || (status ? `请求失败 ${status}` : '网络错误，请确认后端已启动且地址正确')
+    if (e?.code === 'ERR_NETWORK') show = '无法连接后端，请确认后端已启动（如 http://localhost:8080）'
+    console.error('[学员一键登录] 请求异常', e?.response?.data || e?.message || e)
+    ElMessage.error(show)
+  } finally {
+    devStudentLoginLoading.value = false
+  }
+}
+
+async function devCoachLogin() {
+  devCoachLoginLoading.value = true
+  try {
+    const res = await http.post('/api/user/coach/dev-login', { secret: DEV_ADMIN_SECRET })
+    const code = res?.data?.code
+    const ok = code === 200 || code === '200'
+    if (!ok) {
+      const msg = res?.data?.msg || '一键登录失败'
+      console.error('[教练一键登录] 后端返回异常', res?.data)
+      ElMessage.error(msg)
+      return
+    }
+    const data = res.data.data || {}
+    const token = data.token || ''
+    if (!token) {
+      console.error('[教练一键登录] 未返回 token', res?.data)
+      ElMessage.error('登录失败：未返回 token')
+      return
+    }
+    auth.login({
+      token,
+      role: 'coach',
+      profile: {
+        name: data.name || '教练',
+        mobile: data.mobile || '',
+      },
+    })
+    ElMessage.success('已以教练身份进入')
+    router.replace(auth.homePath)
+  } catch (e) {
+    const status = e?.response?.status
+    const msg = e?.response?.data?.msg || e?.response?.data?.message
+    let show = msg || (status ? `请求失败 ${status}` : '网络错误，请确认后端已启动且地址正确')
+    if (e?.code === 'ERR_NETWORK') show = '无法连接后端，请确认后端已启动（如 http://localhost:8080）'
+    console.error('[教练一键登录] 请求异常', e?.response?.data || e?.message || e)
+    ElMessage.error(show)
+  } finally {
+    devCoachLoginLoading.value = false
+  }
+}
+
 onMounted(refreshCaptcha)
 </script>
 
@@ -305,6 +399,17 @@ onMounted(refreshCaptcha)
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.dev-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dev-row:first-child {
+  margin-top: 0;
 }
 
 .btn {
