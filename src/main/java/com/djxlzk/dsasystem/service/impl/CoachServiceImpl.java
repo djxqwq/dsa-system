@@ -3,6 +3,7 @@ package com.djxlzk.dsasystem.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.djxlzk.dsasystem.dto.CoachDTO;
+import com.djxlzk.dsasystem.dto.CoachProfileDTO;
 import com.djxlzk.dsasystem.dto.LoginDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.entity.Coach;
@@ -197,5 +198,47 @@ public class CoachServiceImpl implements CoachService {
         wrapper.select("id", "name", "coach_no");
         wrapper.orderByAsc("name");
         return ResultDTO.success(coachMapper.selectList(wrapper));
+    }
+
+    @Override
+    public ResultDTO<?> getProfile(Long coachId) {
+        Coach coach = coachMapper.selectById(coachId);
+        if (coach == null) {
+            return ResultDTO.error(400, "教练不存在");
+        }
+        return ResultDTO.success(coach);
+    }
+
+    @Override
+    public ResultDTO<?> updateProfile(Long coachId, CoachProfileDTO profileDTO) {
+        Coach coach = coachMapper.selectById(coachId);
+        if (coach == null) {
+            return ResultDTO.error(400, "教练不存在");
+        }
+        if (StringUtils.hasText(profileDTO.getMobile()) && !profileDTO.getMobile().equals(coach.getMobile())) {
+            QueryWrapper<Coach> w = new QueryWrapper<>();
+            w.eq("mobile", profileDTO.getMobile());
+            if (coachMapper.selectCount(w) > 0) {
+                return ResultDTO.error(400, "该手机号已被使用");
+            }
+        }
+        if (StringUtils.hasText(profileDTO.getCoachNo()) && !profileDTO.getCoachNo().equals(coach.getCoachNo())) {
+            QueryWrapper<Coach> w = new QueryWrapper<>();
+            w.eq("coach_no", profileDTO.getCoachNo());
+            if (coachMapper.selectCount(w) > 0) {
+                return ResultDTO.error(400, "教练工号已被使用");
+            }
+        }
+        if (StringUtils.hasText(profileDTO.getName())) {
+            coach.setName(profileDTO.getName());
+        }
+        if (StringUtils.hasText(profileDTO.getMobile())) {
+            coach.setMobile(profileDTO.getMobile());
+        }
+        if (StringUtils.hasText(profileDTO.getCoachNo())) {
+            coach.setCoachNo(profileDTO.getCoachNo());
+        }
+        coachMapper.updateById(coach);
+        return ResultDTO.success("更新成功");
     }
 }

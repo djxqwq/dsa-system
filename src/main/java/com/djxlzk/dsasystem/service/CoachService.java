@@ -1,6 +1,7 @@
 package com.djxlzk.dsasystem.service;
 
 import com.djxlzk.dsasystem.dto.CoachDTO;
+import com.djxlzk.dsasystem.dto.CoachProfileDTO;
 import com.djxlzk.dsasystem.dto.LoginDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.entity.Coach;
@@ -23,4 +24,8 @@ public interface CoachService {
     ResultDTO<?> resetPassword(Long id);
 
     ResultDTO<?> listAllCoaches();
+
+    ResultDTO<?> getProfile(Long coachId);
+
+    ResultDTO<?> updateProfile(Long coachId, CoachProfileDTO profileDTO);
 }

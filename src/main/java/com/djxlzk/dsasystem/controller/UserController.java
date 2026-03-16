@@ -1,6 +1,7 @@
 package com.djxlzk.dsasystem.controller;
 
 import com.djxlzk.dsasystem.dto.AdminLoginDTO;
+import com.djxlzk.dsasystem.dto.CoachProfileDTO;
 import com.djxlzk.dsasystem.dto.LoginDTO;
 import com.djxlzk.dsasystem.dto.PasswordDTO;
 import com.djxlzk.dsasystem.dto.RegisterDTO;
@@ -125,5 +126,30 @@ public class UserController {
     public ResultDTO<?> updateStudentProfile(@RequestBody @Validated StudentProfileDTO profileDTO, Authentication authentication) {
         Long studentId = (Long) authentication.getPrincipal();
         return studentService.updateProfile(studentId, profileDTO);
+    }
+
+    /**
+     * 教练获取个人信息
+     * 
+     * @param authentication 认证信息
+     * @return 响应结果
+     */
+    @GetMapping("/coach/profile")
+    public ResultDTO<?> getCoachProfile(Authentication authentication) {
+        Long coachId = (Long) authentication.getPrincipal();
+        return coachService.getProfile(coachId);
+    }
+
+    /**
+     * 教练更新个人信息
+     * 
+     * @param profileDTO     个人信息
+     * @param authentication 认证信息
+     * @return 响应结果
+     */
+    @PutMapping("/coach/profile")
+    public ResultDTO<?> updateCoachProfile(@RequestBody @Validated CoachProfileDTO profileDTO, Authentication authentication) {
+        Long coachId = (Long) authentication.getPrincipal();
+        return coachService.updateProfile(coachId, profileDTO);
     }
 }

@@ -6,42 +6,27 @@
         <div class="s">维护教练资料与联系方式</div>
       </div>
 
-      <el-form :model="form" label-width="96px" class="form">
+      <el-form :model="form" label-width="96px" class="form" v-loading="loading">
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12">
             <el-form-item label="姓名">
-              <el-input v-model="form.name" />
+              <el-input v-model="form.name" placeholder="请输入姓名" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="手机号">
-              <el-input v-model="form.mobile" />
+              <el-input v-model="form.mobile" placeholder="请输入手机号" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="工号">
-              <el-input v-model="form.code" />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12">
-            <el-form-item label="状态">
-              <el-select v-model="form.status" style="width: 100%">
-                <el-option label="在岗" value="on" />
-                <el-option label="休息" value="off" />
-              </el-select>
+              <el-input v-model="form.coachNo" placeholder="请输入工号" />
             </el-form-item>
           </el-col>
         </el-row>
 
-        <el-form-item label="擅长科目">
-          <el-select v-model="form.skills" multiple style="width: 100%" placeholder="请选择">
-            <el-option label="科目二" value="k2" />
-            <el-option label="科目三" value="k3" />
-          </el-select>
-        </el-form-item>
-
         <div class="actions">
-          <el-button type="primary" @click="onSave">保存</el-button>
+          <el-button type="primary" @click="onSave" :loading="saving">保存</el-button>
           <el-button @click="onReset">重置</el-button>
         </div>
       </el-form>
@@ -74,25 +59,82 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http'
+import { useAuthStore } from '../../stores/auth'
+
+const authStore = useAuthStore()
+const loading = ref(false)
+const saving = ref(false)
 
 const form = reactive({
-  name: '教练用户',
-  mobile: '13900139000',
-  code: 'C-0001',
-  status: 'on',
-  skills: ['k2'],
+  name: '',
+  mobile: '',
+  coachNo: '',
 })
 
-function onSave() {
-  ElMessage.success('已保存（演示）')
+async function loadProfile() {
+  loading.value = true
+  try {
+    const res = await http.get('/api/user/coach/profile')
+    if (res.data.code === 200) {
+      const data = res.data.data
+      form.name = data.name || ''
+      form.mobile = data.mobile || ''
+      form.coachNo = data.coachNo || ''
+    } else {
+      ElMessage.error(res.data.msg || '加载失败')
+    }
+  } catch (error) {
+    ElMessage.error('网络错误')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function onSave() {
+  if (!form.name?.trim()) {
+    ElMessage.warning('请输入姓名')
+    return
+  }
+  if (!form.mobile?.trim()) {
+    ElMessage.warning('请输入手机号')
+    return
+  }
+  if (!/^1[3-9]\d{9}$/.test(form.mobile)) {
+    ElMessage.warning('手机号格式不正确')
+    return
+  }
+  try {
+    saving.value = true
+    const res = await http.put('/api/user/coach/profile', {
+      name: form.name,
+      mobile: form.mobile,
+      coachNo: form.coachNo,
+    })
+    if (res.data.code === 200) {
+      ElMessage.success('保存成功')
+      authStore.profile.name = form.name
+      authStore.profile.mobile = form.mobile
+      authStore.persist()
+    } else {
+      ElMessage.error(res.data.msg || '保存失败')
+    }
+  } catch (error) {
+    const msg = error.response?.data?.msg || error.response?.data?.message
+    if (msg) {
+      ElMessage.error(msg)
+    } else {
+      ElMessage.error('保存失败，请稍后重试')
+    }
+  } finally {
+    saving.value = false
+  }
 }
 
 function onReset() {
-  form.status = 'on'
-  form.skills = ['k2']
+  loadProfile()
 }
 
 const passwordFormRef = ref(null)
@@ -161,6 +203,10 @@ function onResetPassword() {
   passwordForm.confirmPassword = ''
   passwordFormRef.value?.resetFields()
 }
+
+onMounted(() => {
+  loadProfile()
+})
 </script>
 
 <style scoped>
