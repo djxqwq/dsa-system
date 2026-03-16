@@ -73,7 +73,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setRemark(dto.getRemark());
 
         appointmentMapper.insert(appointment);
-        scheduleMapper.updateBookedCount(matchedSlot.getId(), 1);
 
         return ResultDTO.success("预约成功，等待教练确认", appointment);
     }
@@ -100,27 +99,23 @@ public class AppointmentServiceImpl implements AppointmentService {
             return ResultDTO.error(400, "已完成的预约无法取消");
         }
 
-        LocalDate appointmentDate = appointment.getAppointmentDate();
-        LocalTime startTime = appointment.getStartTime();
-        LocalTime endTime = appointment.getEndTime();
-
+        int previousStatus = appointment.getStatus();
         appointment.setStatus(3);
         appointmentMapper.updateById(appointment);
 
-        List<Schedule> schedules = scheduleMapper.findAvailableSlotsByCoach(appointmentDate, appointment.getCoachId());
-        for (Schedule slot : schedules) {
-            boolean isWithinSlot = !startTime.isBefore(slot.getStartTime()) && !endTime.isAfter(slot.getEndTime());
-            if (isWithinSlot) {
-                scheduleMapper.updateBookedCount(slot.getId(), -1);
-                break;
-            }
-        }
+        if (previousStatus == 1) {
+            LocalDate appointmentDate = appointment.getAppointmentDate();
+            LocalTime startTime = appointment.getStartTime();
+            LocalTime endTime = appointment.getEndTime();
 
-        if ("student".equals(role)) {
-            Student student = studentMapper.selectById(userId);
-            if (student != null && student.getNoShowCount() != null) {
-                student.setNoShowCount(student.getNoShowCount() + 1);
-                studentMapper.updateById(student);
+            List<Schedule> schedules = scheduleMapper.findAvailableSlotsByCoach(appointmentDate,
+                    appointment.getCoachId());
+            for (Schedule slot : schedules) {
+                boolean isWithinSlot = !startTime.isBefore(slot.getStartTime()) && !endTime.isAfter(slot.getEndTime());
+                if (isWithinSlot) {
+                    scheduleMapper.updateBookedCount(slot.getId(), -1);
+                    break;
+                }
             }
         }
 
@@ -141,6 +136,19 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         if (appointment.getStatus() != 0) {
             return ResultDTO.error(400, "只能确认待确认状态的预约");
+        }
+
+        List<Schedule> schedules = scheduleMapper.findAvailableSlotsByCoach(appointment.getAppointmentDate(), coachId);
+        for (Schedule slot : schedules) {
+            boolean isWithinSlot = !appointment.getStartTime().isBefore(slot.getStartTime())
+                    && !appointment.getEndTime().isAfter(slot.getEndTime());
+            if (isWithinSlot) {
+                if (slot.getRemainingCapacity() == null || slot.getRemainingCapacity() <= 0) {
+                    return ResultDTO.error(400, "该时段已约满，无法确认");
+                }
+                scheduleMapper.updateBookedCount(slot.getId(), 1);
+                break;
+            }
         }
 
         appointment.setStatus(1);

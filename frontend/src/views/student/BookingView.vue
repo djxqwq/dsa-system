@@ -240,6 +240,18 @@ function minutesToTime(minutes) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
+function getRemaining(slot) {
+  if (slot.remainingCapacity != null && slot.remainingCapacity !== undefined) {
+    return slot.remainingCapacity
+  }
+  if (slot.remaining_capacity != null && slot.remaining_capacity !== undefined) {
+    return slot.remaining_capacity
+  }
+  const capacity = slot.capacity || 1
+  const booked = slot.bookedCount || slot.booked_count || 0
+  return capacity - booked
+}
+
 function isTimeAvailable(time) {
   if (!availableSlots.value.length) return false
   
@@ -248,7 +260,7 @@ function isTimeAvailable(time) {
   for (const slot of availableSlots.value) {
     const slotStart = timeToMinutes(slot.startTime)
     const slotEnd = timeToMinutes(slot.endTime)
-    const remaining = slot.remainingCapacity != null ? slot.remainingCapacity : (slot.capacity - slot.bookedCount)
+    const remaining = getRemaining(slot)
     
     if (minutes >= slotStart && minutes < slotEnd && remaining > 0) {
       return true
@@ -271,9 +283,9 @@ function isValidEndTime(endTime) {
   for (const slot of availableSlots.value) {
     const slotStart = timeToMinutes(slot.startTime)
     const slotEnd = timeToMinutes(slot.endTime)
-    const remaining = slot.remainingCapacity != null ? slot.remainingCapacity : (slot.capacity - slot.bookedCount)
+    const remaining = getRemaining(slot)
     
-    if (startMinutes >= slotStart && endMinutes <= slotEnd && remaining > 0) {
+    if (remaining > 0 && startMinutes >= slotStart && endMinutes <= slotEnd) {
       return true
     }
   }

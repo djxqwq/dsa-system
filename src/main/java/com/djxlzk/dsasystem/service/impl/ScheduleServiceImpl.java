@@ -25,7 +25,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     public ResultDTO<?> createSchedule(ScheduleDTO dto, Long coachId) {
         LocalTime startTime = LocalTime.parse(dto.getStartTime());
         LocalTime endTime = LocalTime.parse(dto.getEndTime());
-        
+
         long durationMinutes = Duration.between(startTime, endTime).toMinutes();
         if (durationMinutes < 120) {
             return ResultDTO.error(400, "排班时长最少2小时");
