@@ -3,6 +3,7 @@ package com.djxlzk.dsasystem.controller;
 import com.djxlzk.dsasystem.dto.CoachDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.service.CoachService;
+import com.djxlzk.dsasystem.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -15,6 +16,9 @@ public class CoachController {
 
     @Autowired
     private CoachService coachService;
+
+    @Autowired
+    private StudentService studentService;
 
     @PostMapping
     public ResultDTO<?> addCoach(@RequestBody @Validated CoachDTO coachDTO) {
@@ -47,5 +51,21 @@ public class CoachController {
     @GetMapping("/all")
     public ResultDTO<?> listAllCoaches() {
         return coachService.listAllCoaches();
+    }
+
+    @PutMapping("/student/{studentId}/requiredHours")
+    public ResultDTO<?> updateStudentRequiredHours(
+            @PathVariable Long studentId,
+            @RequestParam Integer requiredHours) {
+        return studentService.updateRequiredHours(studentId, requiredHours);
+    }
+
+    @GetMapping("/students")
+    public ResultDTO<?> listStudents(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return studentService.listStudents(keyword, status, page, size);
     }
 }

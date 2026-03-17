@@ -2,8 +2,8 @@
   <div class="grid">
     <div class="glass card">
       <div class="head">
-        <div class="h">用户管理</div>
-        <div class="s">管理学员账号与基础信息，与数据库同步</div>
+        <div class="h">学员管理</div>
+        <div class="s">管理学员账号、车型与要求学时等信息</div>
       </div>
 
       <div class="tools">
@@ -14,26 +14,36 @@
           <el-option label="禁用" :value="0" />
         </el-select>
         <el-button type="primary" plain @click="search">查询</el-button>
-        <el-button type="primary" @click="openAdd">新增用户</el-button>
+        <el-button type="primary" @click="openAdd">新增学员</el-button>
       </div>
 
       <el-table v-loading="loading" :data="rows" style="width: 100%" class="table">
-        <el-table-column prop="userName" label="姓名" width="140" />
-        <el-table-column prop="mobile" label="手机号" width="160" />
-        <el-table-column prop="createTime" label="创建时间" width="180">
+        <el-table-column prop="userName" label="姓名" width="120" />
+        <el-table-column prop="mobile" label="手机号" width="140" />
+        <el-table-column prop="carType" label="车型" width="80">
           <template #default="scope">
-            {{ formatTime(scope.row.createTime) }}
+            {{ scope.row.carType || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="120">
+        <el-table-column prop="requiredHours" label="要求学时" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'" effect="dark">
+            {{ scope.row.requiredHours || 12 }} h
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="80">
+          <template #default="scope">
+            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'" effect="dark" size="small">
               {{ scope.row.status === 1 ? '正常' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="noShowCount" label="爽约次数" width="100" />
-        <el-table-column label="操作" min-width="260" fixed="right">
+        <el-table-column prop="noShowCount" label="爽约" width="60" />
+        <el-table-column prop="createTime" label="创建时间" width="160">
+          <template #default="scope">
+            {{ formatTime(scope.row.createTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="200" fixed="right">
           <template #default="scope">
             <el-button size="small" type="primary" plain @click="openEdit(scope.row)">编辑</el-button>
             <el-button size="small" type="warning" plain @click="resetPwd(scope.row)">重置密码</el-button>
@@ -59,7 +69,7 @@
 
     <el-dialog
       v-model="dialogVisible"
-      :title="form.id ? '编辑用户' : '新增用户'"
+      :title="form.id ? '编辑学员' : '新增学员'"
       width="480px"
       destroy-on-close
       @close="resetForm"
@@ -76,6 +86,15 @@
         </el-form-item>
         <el-form-item v-if="form.id" label="新密码" prop="password">
           <el-input v-model="form.password" type="password" placeholder="不修改请留空" show-password />
+        </el-form-item>
+        <el-form-item label="车型" prop="carType">
+          <el-select v-model="form.carType" placeholder="请选择车型" style="width: 100%">
+            <el-option label="C1" value="C1" />
+            <el-option label="C2" value="C2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="要求学时" prop="requiredHours">
+          <el-input-number v-model="form.requiredHours" :min="0" :max="200" :step="5" style="width: 100%" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="form.status">
@@ -113,6 +132,8 @@ const form = reactive({
   userName: '',
   mobile: '',
   password: '',
+  carType: null,
+  requiredHours: 12,
   status: 1
 })
 
@@ -172,6 +193,8 @@ function openAdd() {
   form.userName = ''
   form.mobile = ''
   form.password = ''
+  form.carType = null
+  form.requiredHours = 12
   form.status = 1
   dialogVisible.value = true
 }
@@ -181,6 +204,8 @@ function openEdit(row) {
   form.userName = row.userName || ''
   form.mobile = row.mobile || ''
   form.password = ''
+  form.carType = row.carType || null
+  form.requiredHours = row.requiredHours || 12
   form.status = row.status !== undefined ? row.status : 1
   dialogVisible.value = true
 }
@@ -199,6 +224,8 @@ async function submit() {
       id: form.id,
       userName: form.userName,
       mobile: form.mobile,
+      carType: form.carType,
+      requiredHours: form.requiredHours,
       status: form.status
     }
     if (form.password) body.password = form.password
@@ -249,6 +276,8 @@ async function setStatus(row, newStatus) {
       id: row.id,
       userName: row.userName,
       mobile: row.mobile,
+      carType: row.carType,
+      requiredHours: row.requiredHours,
       status: newStatus
     })
     if (res.data.code === 200) {

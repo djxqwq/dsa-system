@@ -168,6 +168,12 @@ public class StudentServiceImpl implements StudentService {
         if (studentDTO.getStatus() != null) {
             exist.setStatus(studentDTO.getStatus());
         }
+        if (studentDTO.getCarType() != null) {
+            exist.setCarType(studentDTO.getCarType());
+        }
+        if (studentDTO.getRequiredHours() != null) {
+            exist.setRequiredHours(studentDTO.getRequiredHours());
+        }
         if (StringUtils.hasText(studentDTO.getPassword())) {
             if (!studentDTO.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,20}$")) {
                 return ResultDTO.error(400, "密码长度需8-20位，包含字母和数字");
@@ -249,5 +255,19 @@ public class StudentServiceImpl implements StudentService {
         data.put("userName", student.getUserName());
         data.put("mobile", student.getMobile());
         return ResultDTO.success("更新成功", data);
+    }
+
+    @Override
+    public ResultDTO<?> updateRequiredHours(Long studentId, Integer requiredHours) {
+        Student student = studentMapper.selectById(studentId);
+        if (student == null) {
+            return ResultDTO.error(400, "学员不存在");
+        }
+        if (requiredHours == null || requiredHours < 0) {
+            return ResultDTO.error(400, "要求学时必须大于等于0");
+        }
+        student.setRequiredHours(requiredHours);
+        studentMapper.updateById(student);
+        return ResultDTO.success("要求学时更新成功");
     }
 }

@@ -59,4 +59,10 @@ public class Student {
      */
     @TableField("car_type")
     private String carType;
+
+    /**
+     * 要求学时（默认12小时）
+     */
+    @TableField(value = "12")
+    private Integer requiredHours;
 }

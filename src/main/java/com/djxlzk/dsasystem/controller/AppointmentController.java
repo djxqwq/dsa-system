@@ -73,4 +73,27 @@ public class AppointmentController {
     public ResultDTO<?> getAppointmentsByVehicle(@PathVariable Long vehicleId) {
         return appointmentService.getAppointmentsByVehicleId(vehicleId);
     }
+
+    @GetMapping("/hours/stats")
+    public ResultDTO<?> getStudentHoursStats(Authentication auth) {
+        Long studentId = (Long) auth.getPrincipal();
+        return appointmentService.getStudentHoursStats(studentId);
+    }
+
+    @GetMapping("/hours/records")
+    public ResultDTO<?> getStudentHoursRecords(Authentication auth) {
+        Long studentId = (Long) auth.getPrincipal();
+        return appointmentService.getStudentHoursRecords(studentId);
+    }
+
+    @GetMapping("/hours/coach/records")
+    public ResultDTO<?> getCoachHoursRecords(Authentication auth) {
+        Long coachId = (Long) auth.getPrincipal();
+        return appointmentService.getCoachHoursRecords(coachId);
+    }
+
+    @GetMapping("/hours/stats/byStudent")
+    public ResultDTO<?> getStudentHoursStatsById(@RequestParam Long studentId) {
+        return appointmentService.getStudentHoursStats(studentId);
+    }
 }

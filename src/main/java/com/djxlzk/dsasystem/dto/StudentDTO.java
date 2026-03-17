@@ -23,4 +23,6 @@ public class StudentDTO {
     private Integer status;
 
     private String carType;
+
+    private Integer requiredHours;
 }

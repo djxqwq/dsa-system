@@ -16,6 +16,7 @@ const CoachConfirm = () => import('../views/coach/ConfirmView.vue')
 const CoachHours = () => import('../views/coach/HoursRecordView.vue')
 const CoachAppointments = () => import('../views/coach/AppointmentsView.vue')
 const CoachVehicles = () => import('../views/coach/VehiclesView.vue')
+const CoachStudents = () => import('../views/coach/StudentsView.vue')
 
 const AdminUsers = () => import('../views/admin/UsersView.vue')
 const AdminCoaches = () => import('../views/admin/CoachesView.vue')
@@ -42,8 +43,9 @@ const routes = [
       { path: 'coach/appointments', name: 'coach-appointments', component: CoachAppointments, meta: { role: 'coach', title: '预约记录' } },
       { path: 'coach/hours', name: 'coach-hours', component: CoachHours, meta: { role: 'coach', title: '学时记录' } },
       { path: 'coach/vehicles', name: 'coach-vehicles', component: CoachVehicles, meta: { role: 'coach', title: '车辆管理' } },
+      { path: 'coach/students', name: 'coach-students', component: CoachStudents, meta: { role: 'coach', title: '学员管理' } },
 
-      { path: 'admin/users', name: 'admin-users', component: AdminUsers, meta: { role: 'admin', title: '用户管理' } },
+      { path: 'admin/users', name: 'admin-users', component: AdminUsers, meta: { role: 'admin', title: '学员管理' } },
       { path: 'admin/coaches', name: 'admin-coaches', component: AdminCoaches, meta: { role: 'admin', title: '教练管理' } },
       { path: 'admin/vehicles', name: 'admin-vehicles', component: AdminVehicles, meta: { role: 'admin', title: '车辆管理' } },
       { path: 'admin/stats', name: 'admin-stats', component: AdminStats, meta: { role: 'admin', title: '数据统计分析' } },

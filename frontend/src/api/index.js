@@ -151,3 +151,21 @@ export const repairApi = {
     return http.delete(`/api/repair/${id}`)
   }
 }
+
+export const hoursApi = {
+  getStudentStats() {
+    return http.get('/api/appointment/hours/stats')
+  },
+
+  getStudentRecords() {
+    return http.get('/api/appointment/hours/records')
+  },
+
+  getCoachRecords() {
+    return http.get('/api/appointment/hours/coach/records')
+  },
+
+  updateRequiredHours(studentId, requiredHours) {
+    return http.put(`/api/coach/student/${studentId}/requiredHours?requiredHours=${requiredHours}`)
+  }
+}

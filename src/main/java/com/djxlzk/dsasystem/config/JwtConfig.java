@@ -26,6 +26,8 @@ public class JwtConfig {
                         .antMatchers("/api/user/**").permitAll()
                         .antMatchers("/api/captcha/**").permitAll()
                         .antMatchers("/api/coach/all").authenticated()
+                        .antMatchers("/api/coach/students").hasAnyRole("COACH", "ADMIN")
+                        .antMatchers("/api/coach/student/**").hasAnyRole("COACH", "ADMIN")
                         .antMatchers("/api/coach/**").hasRole("ADMIN")
                         .antMatchers("/api/student/**").hasRole("ADMIN")
                         .antMatchers("/api/vehicle/coach").authenticated()

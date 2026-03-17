@@ -82,12 +82,13 @@ const menus = computed(() => {
       { label: '预约确认', path: '/app/coach/confirm' },
       { label: '预约记录', path: '/app/coach/appointments' },
       { label: '学时记录', path: '/app/coach/hours' },
+      { label: '学员管理', path: '/app/coach/students' },
       { label: '车辆管理', path: '/app/coach/vehicles' },
     ]
   }
   if (auth.role === 'admin') {
     return [
-      { label: '用户管理', path: '/app/admin/users' },
+      { label: '学员管理', path: '/app/admin/users' },
       { label: '教练管理', path: '/app/admin/coaches' },
       { label: '车辆管理', path: '/app/admin/vehicles' },
       { label: '数据统计分析', path: '/app/admin/stats' },

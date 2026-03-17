@@ -1,6 +1,8 @@
 package com.djxlzk.dsasystem.service.impl;
 
 import com.djxlzk.dsasystem.dto.AppointmentCreateDTO;
+import com.djxlzk.dsasystem.dto.HoursRecordDTO;
+import com.djxlzk.dsasystem.dto.HoursStatsDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.entity.Appointment;
 import com.djxlzk.dsasystem.entity.Schedule;
@@ -13,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -298,5 +303,95 @@ public class AppointmentServiceImpl implements AppointmentService {
     public ResultDTO<?> getAppointmentsByVehicleId(Long vehicleId) {
         List<Appointment> appointments = appointmentMapper.findByVehicleId(vehicleId);
         return ResultDTO.success(appointments);
+    }
+
+    @Override
+    public ResultDTO<HoursStatsDTO> getStudentHoursStats(Long studentId) {
+        BigDecimal completedHours = appointmentMapper.sumCompletedHoursByStudentId(studentId);
+        if (completedHours == null) {
+            completedHours = BigDecimal.ZERO;
+        }
+        
+        int completedSessions = appointmentMapper.countCompletedSessionsByStudentId(studentId);
+        
+        BigDecimal totalHours = new BigDecimal("40");
+        
+        Student student = studentMapper.selectById(studentId);
+        if (student != null && student.getRequiredHours() != null) {
+            totalHours = new BigDecimal(student.getRequiredHours());
+        }
+        
+        HoursStatsDTO stats = new HoursStatsDTO();
+        stats.setTotalHours(totalHours);
+        stats.setCompletedHours(completedHours);
+        stats.setRemainingHours(totalHours.subtract(completedHours).max(BigDecimal.ZERO));
+        stats.setCompletedSessions(completedSessions);
+        
+        return ResultDTO.success(stats);
+    }
+
+    @Override
+    public ResultDTO<List<HoursRecordDTO>> getStudentHoursRecords(Long studentId) {
+        List<Appointment> appointments = appointmentMapper.findCompletedByStudentId(studentId);
+        List<HoursRecordDTO> records = new ArrayList<>();
+        
+        for (Appointment appointment : appointments) {
+            HoursRecordDTO record = convertToHoursRecord(appointment);
+            records.add(record);
+        }
+        
+        return ResultDTO.success(records);
+    }
+
+    @Override
+    public ResultDTO<List<HoursRecordDTO>> getCoachHoursRecords(Long coachId) {
+        List<Appointment> appointments = appointmentMapper.findCompletedByCoachId(coachId);
+        List<HoursRecordDTO> records = new ArrayList<>();
+        
+        for (Appointment appointment : appointments) {
+            HoursRecordDTO record = convertToHoursRecord(appointment);
+            records.add(record);
+        }
+        
+        return ResultDTO.success(records);
+    }
+    
+    private HoursRecordDTO convertToHoursRecord(Appointment appointment) {
+        HoursRecordDTO record = new HoursRecordDTO();
+        record.setId(appointment.getId());
+        record.setDate(appointment.getAppointmentDate());
+        record.setStudentName(appointment.getStudentName());
+        record.setCoachName(appointment.getCoachName());
+        record.setRemark(appointment.getRemark());
+        record.setStatus(appointment.getStatus());
+        
+        long minutes = Duration.between(appointment.getStartTime(), appointment.getEndTime()).toMinutes();
+        BigDecimal hours = BigDecimal.valueOf(minutes)
+                .divide(BigDecimal.valueOf(60), 1, RoundingMode.HALF_UP);
+        record.setHours(hours);
+        
+        String statusText;
+        switch (appointment.getStatus()) {
+            case 0:
+                statusText = "待确认";
+                break;
+            case 1:
+                statusText = "已确认";
+                break;
+            case 2:
+                statusText = "已完成";
+                break;
+            case 3:
+                statusText = "已取消";
+                break;
+            case 4:
+                statusText = "爽约";
+                break;
+            default:
+                statusText = "未知";
+        }
+        record.setStatusText(statusText);
+        
+        return record;
     }
 }

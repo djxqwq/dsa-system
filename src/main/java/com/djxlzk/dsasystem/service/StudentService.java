@@ -21,4 +21,6 @@ public interface StudentService {
 
     ResultDTO<?> getProfile(Long studentId);
     ResultDTO<?> updateProfile(Long studentId, StudentProfileDTO profileDTO);
+
+    ResultDTO<?> updateRequiredHours(Long studentId, Integer requiredHours);
 }

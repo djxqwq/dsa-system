@@ -3,24 +3,64 @@
     <div class="glass card">
       <div class="head">
         <div class="h">学时记录</div>
-        <div class="s">记录学员训练学时，形成可追溯明细</div>
+        <div class="s">查看学员训练学时记录，形成可追溯明细</div>
       </div>
 
-      <div class="tools">
-        <el-input v-model="form.student" style="width: 220px" placeholder="学员姓名/手机号" clearable />
-        <el-date-picker v-model="form.date" type="date" placeholder="日期" />
-        <el-input-number v-model="form.hours" :min="1" :max="8" />
-        <el-button type="primary" @click="add">新增记录</el-button>
+      <div class="stats">
+        <div class="stat glass">
+          <div class="k">总教学时长</div>
+          <div class="v">{{ totalHours }} h</div>
+        </div>
+        <div class="stat glass">
+          <div class="k">教学场次</div>
+          <div class="v">{{ records.length }} 次</div>
+        </div>
       </div>
 
-      <el-table :data="rows" style="width: 100%" class="table">
-        <el-table-column prop="date" label="日期" width="120" />
-        <el-table-column prop="student" label="学员" width="140" />
-        <el-table-column prop="hours" label="学时" width="100" />
-        <el-table-column prop="remark" label="备注" />
-        <el-table-column label="操作" width="120">
+      <el-divider border-style="dashed" />
+
+      <div class="table-header">
+        <span class="table-title">学时明细</span>
+        <el-input 
+          v-model="searchKeyword" 
+          placeholder="搜索学员姓名" 
+          clearable 
+          style="width: 200px"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
+
+      <el-table 
+        :data="filteredRecords" 
+        style="width: 100%" 
+        class="table"
+        v-loading="loading"
+        empty-text="暂无学时记录"
+      >
+        <el-table-column prop="date" label="日期" width="120">
           <template #default="scope">
-            <el-button size="small" type="danger" plain @click="remove(scope.$index)">删除</el-button>
+            {{ formatDate(scope.row.date) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="studentName" label="学员" width="140" />
+        <el-table-column prop="hours" label="学时" width="100">
+          <template #default="scope">
+            {{ scope.row.hours }} h
+          </template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注">
+          <template #default="scope">
+            {{ scope.row.remark || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="statusText" label="状态" width="100">
+          <template #default="scope">
+            <el-tag :type="getStatusType(scope.row.status)" size="small">
+              {{ scope.row.statusText }}
+            </el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -29,30 +69,68 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { hoursApi } from '../../api'
+import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 
-const form = reactive({
-  student: '',
-  date: '',
-  hours: 2,
+const loading = ref(false)
+const records = ref([])
+const searchKeyword = ref('')
+
+const filteredRecords = computed(() => {
+  if (!searchKeyword.value) return records.value
+  const keyword = searchKeyword.value.toLowerCase()
+  return records.value.filter(record => 
+    record.studentName && record.studentName.toLowerCase().includes(keyword)
+  )
 })
 
-const rows = ref([
-  { date: '2026-03-12', student: '张三', hours: 2, remark: '倒库练习' },
-])
+const totalHours = computed(() => {
+  return records.value.reduce((sum, record) => sum + (record.hours || 0), 0)
+})
 
-function add() {
-  rows.value.unshift({
-    date: form.date || '2026-03-14',
-    student: form.student || '学员',
-    hours: form.hours,
-    remark: '',
-  })
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\//g, '-')
 }
 
-function remove(idx) {
-  rows.value.splice(idx, 1)
+function getStatusType(status) {
+  switch (status) {
+    case 2:
+      return 'success'
+    case 1:
+      return 'warning'
+    case 0:
+      return 'info'
+    default:
+      return ''
+  }
 }
+
+async function fetchRecords() {
+  loading.value = true
+  try {
+    const res = await hoursApi.getCoachRecords()
+    if (res.code === 200) {
+      records.value = res.data || []
+    }
+  } catch (error) {
+    console.error('获取学时记录失败:', error)
+    ElMessage.error('获取学时记录失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchRecords()
+})
 </script>
 
 <style scoped>
@@ -80,18 +158,39 @@ function remove(idx) {
   font-size: 12px;
 }
 
-.tools {
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  padding: 12px 14px;
+}
+
+.k {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
+.v {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.table-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.tools :deep(.el-input__wrapper),
-.tools :deep(.el-date-editor) {
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+.table-title {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
 }
 
 .table :deep(.el-table) {
@@ -104,5 +203,15 @@ function remove(idx) {
 
 .table :deep(.el-table th.el-table__cell) {
   background: rgba(255, 255, 255, 0.06);
+}
+
+.table :deep(.el-table__empty-text) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.table :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.10);
 }
 </style>

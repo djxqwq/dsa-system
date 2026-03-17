@@ -1,8 +1,12 @@
 package com.djxlzk.dsasystem.service;
 
 import com.djxlzk.dsasystem.dto.AppointmentCreateDTO;
+import com.djxlzk.dsasystem.dto.HoursRecordDTO;
+import com.djxlzk.dsasystem.dto.HoursStatsDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.entity.Appointment;
+
+import java.util.List;
 
 public interface AppointmentService {
 
@@ -27,4 +31,10 @@ public interface AppointmentService {
     Appointment getById(Long id);
 
     ResultDTO<?> getAppointmentsByVehicleId(Long vehicleId);
+
+    ResultDTO<HoursStatsDTO> getStudentHoursStats(Long studentId);
+
+    ResultDTO<List<HoursRecordDTO>> getStudentHoursRecords(Long studentId);
+
+    ResultDTO<List<HoursRecordDTO>> getCoachHoursRecords(Long coachId);
 }
