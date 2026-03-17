@@ -172,7 +172,7 @@ public class CoachServiceImpl implements CoachService {
                     .or().like("mobile", keyword)
                     .or().like("coach_no", keyword));
         }
-        wrapper.orderByDesc("create_time");
+        wrapper.orderByAsc("coach_no");
         Page<Coach> result = coachMapper.selectPage(p, wrapper);
         Map<String, Object> data = new HashMap<>();
         data.put("records", result.getRecords());

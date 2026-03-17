@@ -28,19 +28,27 @@
               </template>
             </el-table-column>
             <el-table-column prop="remark" label="备注" min-width="150" />
-            <el-table-column label="操作" width="320">
+            <el-table-column label="操作" width="520">
               <template #default="scope">
                 <el-button size="small" type="success" plain @click="showUsage(scope.row)">
                   <el-icon><Clock /></el-icon>
                   使用记录
                 </el-button>
-                <el-button size="small" type="primary" plain @click="showMaintenance(scope.row)">
+                <el-button size="small" type="primary" plain @click="showMaintenanceRecords(scope.row)">
                   <el-icon><Tools /></el-icon>
-                  保养
+                  保养记录
                 </el-button>
-                <el-button size="small" type="warning" plain @click="showRepair(scope.row)">
+                <el-button size="small" type="warning" plain @click="showRepairRecords(scope.row)">
                   <el-icon><Setting /></el-icon>
-                  维修
+                  维修记录
+                </el-button>
+                <el-button size="small" type="primary" @click="showMaintenance(scope.row)">
+                  <el-icon><Plus /></el-icon>
+                  添加保养
+                </el-button>
+                <el-button size="small" type="warning" @click="showRepair(scope.row)">
+                  <el-icon><Plus /></el-icon>
+                  添加维修
                 </el-button>
               </template>
             </el-table-column>
@@ -76,12 +84,15 @@
 
         <el-tab-pane label="保养记录" name="maintenance">
           <div class="tools">
+            <el-select v-model="selectedMaintenanceVehicleId" placeholder="选择车辆筛选" clearable style="width: 200px">
+              <el-option v-for="v in vehicles" :key="v.id" :label="v.plateNumber" :value="v.id" />
+            </el-select>
             <el-button type="primary" plain @click="openMaintenanceDialog()">
               <el-icon><Plus /></el-icon>
               新增保养记录
             </el-button>
           </div>
-          <el-table :data="maintenanceRecords" style="width: 100%" class="table" v-loading="maintenanceLoading">
+          <el-table :data="filteredMaintenanceRecords" style="width: 100%" class="table" v-loading="maintenanceLoading">
             <el-table-column prop="plateNumber" label="车牌号" width="120" />
             <el-table-column prop="maintenanceType" label="保养类型" width="120" />
             <el-table-column prop="maintenanceDate" label="保养日期" width="120" />
@@ -116,12 +127,15 @@
 
         <el-tab-pane label="维修记录" name="repair">
           <div class="tools">
+            <el-select v-model="selectedRepairVehicleId" placeholder="选择车辆筛选" clearable style="width: 200px">
+              <el-option v-for="v in vehicles" :key="v.id" :label="v.plateNumber" :value="v.id" />
+            </el-select>
             <el-button type="primary" plain @click="openRepairDialog()">
               <el-icon><Plus /></el-icon>
               新增维修记录
             </el-button>
           </div>
-          <el-table :data="repairRecords" style="width: 100%" class="table" v-loading="repairLoading">
+          <el-table :data="filteredRepairRecords" style="width: 100%" class="table" v-loading="repairLoading">
             <el-table-column prop="plateNumber" label="车牌号" width="120" />
             <el-table-column prop="repairType" label="维修类型" width="120" />
             <el-table-column prop="repairDate" label="维修日期" width="120" />
@@ -264,6 +278,8 @@ const repairLoading = ref(false)
 const usageRecords = ref([])
 const usageLoading = ref(false)
 const selectedVehicleId = ref(null)
+const selectedMaintenanceVehicleId = ref(null)
+const selectedRepairVehicleId = ref(null)
 const submitting = ref(false)
 
 const maintenanceDialogVisible = ref(false)
@@ -414,6 +430,20 @@ const filteredUsageRecords = computed(() => {
   return usageRecords.value.filter(r => r.vehicleId === selectedVehicleId.value)
 })
 
+const filteredMaintenanceRecords = computed(() => {
+  if (!selectedMaintenanceVehicleId.value) {
+    return maintenanceRecords.value
+  }
+  return maintenanceRecords.value.filter(r => r.vehicleId === selectedMaintenanceVehicleId.value)
+});
+
+const filteredRepairRecords = computed(() => {
+  if (!selectedRepairVehicleId.value) {
+    return repairRecords.value
+  }
+  return repairRecords.value.filter(r => r.vehicleId === selectedRepairVehicleId.value)
+})
+
 function filterUsageRecords() {
 }
 
@@ -424,6 +454,16 @@ function refreshVehicles() {
 function showUsage(row) {
   selectedVehicleId.value = row.id
   activeTab.value = 'usage'
+}
+
+function showMaintenanceRecords(row) {
+  selectedMaintenanceVehicleId.value = row.id
+  activeTab.value = 'maintenance'
+}
+
+function showRepairRecords(row) {
+  selectedRepairVehicleId.value = row.id
+  activeTab.value = 'repair'
 }
 
 function showMaintenance(row) {
