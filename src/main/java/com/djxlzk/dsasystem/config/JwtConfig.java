@@ -39,6 +39,7 @@ public class JwtConfig {
                         .antMatchers("/api/schedule/**").authenticated()
                         .antMatchers("/api/appointment/**").authenticated()
                         .antMatchers("/api/stats/**").hasRole("ADMIN")
+                        .antMatchers("/api/config/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

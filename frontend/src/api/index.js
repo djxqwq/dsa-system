@@ -175,3 +175,17 @@ export const statsApi = {
     return http.get('/api/stats/dashboard')
   }
 }
+
+export const configApi = {
+  getAll() {
+    return http.get('/api/config')
+  },
+
+  update(data) {
+    return http.put('/api/config', data)
+  },
+
+  updateByKey(key, value) {
+    return http.put(`/api/config/${key}?value=${value}`)
+  }
+}
