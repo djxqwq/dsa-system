@@ -63,6 +63,6 @@ public class Student {
     /**
      * 要求学时（默认12小时）
      */
-    @TableField(value = "12")
-    private Integer requiredHours;
+    @TableField(value = "required_hours")
+    private Integer requiredHours = 12;
 }

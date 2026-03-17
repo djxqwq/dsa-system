@@ -314,7 +314,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         
         int completedSessions = appointmentMapper.countCompletedSessionsByStudentId(studentId);
         
-        BigDecimal totalHours = new BigDecimal("40");
+        BigDecimal totalHours = new BigDecimal("12");
         
         Student student = studentMapper.selectById(studentId);
         if (student != null && student.getRequiredHours() != null) {

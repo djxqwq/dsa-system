@@ -102,8 +102,8 @@ function formatDate(dateStr) {
 async function fetchStats() {
   try {
     const res = await hoursApi.getStudentStats()
-    if (res.code === 200) {
-      stats.value = res.data
+    if (res.data.code === 200) {
+      stats.value = res.data.data
     }
   } catch (error) {
     console.error('获取学时统计失败:', error)
@@ -114,8 +114,8 @@ async function fetchRecords() {
   loading.value = true
   try {
     const res = await hoursApi.getStudentRecords()
-    if (res.code === 200) {
-      records.value = res.data || []
+    if (res.data.code === 200) {
+      records.value = res.data.data || []
     }
   } catch (error) {
     console.error('获取学时记录失败:', error)
