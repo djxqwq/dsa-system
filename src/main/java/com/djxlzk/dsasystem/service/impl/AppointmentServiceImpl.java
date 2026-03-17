@@ -293,4 +293,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     public Appointment getById(Long id) {
         return appointmentMapper.selectById(id);
     }
+
+    @Override
+    public ResultDTO<?> getAppointmentsByVehicleId(Long vehicleId) {
+        List<Appointment> appointments = appointmentMapper.findByVehicleId(vehicleId);
+        return ResultDTO.success(appointments);
+    }
 }

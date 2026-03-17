@@ -28,8 +28,12 @@
               </template>
             </el-table-column>
             <el-table-column prop="remark" label="备注" min-width="150" />
-            <el-table-column label="操作" width="240">
+            <el-table-column label="操作" width="320">
               <template #default="scope">
+                <el-button size="small" type="success" plain @click="showUsage(scope.row)">
+                  <el-icon><Clock /></el-icon>
+                  使用记录
+                </el-button>
                 <el-button size="small" type="primary" plain @click="showMaintenance(scope.row)">
                   <el-icon><Tools /></el-icon>
                   保养
@@ -40,6 +44,33 @@
                 </el-button>
               </template>
             </el-table-column>
+          </el-table>
+        </el-tab-pane>
+
+        <el-tab-pane label="使用记录" name="usage">
+          <div class="tools">
+            <el-select v-model="selectedVehicleId" placeholder="选择车辆筛选" clearable style="width: 200px">
+              <el-option v-for="v in vehicles" :key="v.id" :label="v.plateNumber" :value="v.id" />
+            </el-select>
+          </div>
+          <el-table :data="filteredUsageRecords" style="width: 100%" class="table" v-loading="usageLoading">
+            <el-table-column prop="plateNumber" label="车牌号" width="120" />
+            <el-table-column prop="coachName" label="教练" width="100" />
+            <el-table-column prop="studentName" label="学员" width="100" />
+            <el-table-column prop="appointmentDate" label="日期" width="120" />
+            <el-table-column label="时间段" width="130">
+              <template #default="scope">
+                {{ scope.row.startTime?.substring(0, 5) }} - {{ scope.row.endTime?.substring(0, 5) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="80">
+              <template #default="scope">
+                <el-tag :type="getAppointmentStatusType(scope.row.status)" effect="dark" size="small">
+                  {{ getAppointmentStatusText(scope.row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="remark" label="备注" min-width="150" />
           </el-table>
         </el-tab-pane>
 
@@ -218,10 +249,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Van, Refresh, Tools, Setting, Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { vehicleApi, maintenanceApi, repairApi } from '../../api'
+import { Van, Refresh, Tools, Setting, Plus, Edit, Delete, Clock } from '@element-plus/icons-vue'
+import { vehicleApi, maintenanceApi, repairApi, appointmentApi } from '../../api'
 
 const activeTab = ref('vehicles')
 const vehicles = ref([])
@@ -230,6 +261,9 @@ const maintenanceRecords = ref([])
 const maintenanceLoading = ref(false)
 const repairRecords = ref([])
 const repairLoading = ref(false)
+const usageRecords = ref([])
+const usageLoading = ref(false)
+const selectedVehicleId = ref(null)
 const submitting = ref(false)
 
 const maintenanceDialogVisible = ref(false)
@@ -274,6 +308,30 @@ function getStatusText(status) {
     case 1: return '可用'
     case 2: return '维修中'
     default: return '停用'
+  }
+}
+
+function getAppointmentStatusType(status) {
+  switch (status) {
+    case 0: return 'warning'
+    case 1: return 'success'
+    case 2: return 'info'
+    case 3: return 'danger'
+    case 4: return 'danger'
+    case 5: return 'danger'
+    default: return 'info'
+  }
+}
+
+function getAppointmentStatusText(status) {
+  switch (status) {
+    case 0: return '待确认'
+    case 1: return '已确认'
+    case 2: return '已完成'
+    case 3: return '已取消'
+    case 4: return '爽约'
+    case 5: return '已拒绝'
+    default: return '未知'
   }
 }
 
@@ -325,8 +383,47 @@ async function loadRepairRecords() {
   }
 }
 
+async function loadUsageRecords() {
+  usageLoading.value = true
+  try {
+    const promises = vehicles.value.map(v => appointmentApi.getByVehicle(v.id))
+    const results = await Promise.all(promises)
+    usageRecords.value = results.flatMap(res => {
+      if (res.data.code === 200) {
+        return res.data.data || []
+      }
+      return []
+    })
+    usageRecords.value.sort((a, b) => {
+      if (a.appointmentDate !== b.appointmentDate) {
+        return b.appointmentDate.localeCompare(a.appointmentDate)
+      }
+      return a.startTime.localeCompare(b.startTime)
+    })
+  } catch (e) {
+    ElMessage.error('网络错误')
+  } finally {
+    usageLoading.value = false
+  }
+}
+
+const filteredUsageRecords = computed(() => {
+  if (!selectedVehicleId.value) {
+    return usageRecords.value
+  }
+  return usageRecords.value.filter(r => r.vehicleId === selectedVehicleId.value)
+})
+
+function filterUsageRecords() {
+}
+
 function refreshVehicles() {
   loadVehicles()
+}
+
+function showUsage(row) {
+  selectedVehicleId.value = row.id
+  activeTab.value = 'usage'
 }
 
 function showMaintenance(row) {
@@ -511,10 +608,11 @@ async function deleteRepair(row) {
   }
 }
 
-onMounted(() => {
-  loadVehicles()
+onMounted(async () => {
+  await loadVehicles()
   loadMaintenanceRecords()
   loadRepairRecords()
+  loadUsageRecords()
 })
 </script>
 

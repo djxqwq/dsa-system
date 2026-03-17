@@ -68,4 +68,9 @@ public class AppointmentController {
         Long studentId = (Long) auth.getPrincipal();
         return appointmentService.getActiveAppointments(studentId);
     }
+
+    @GetMapping("/vehicle/{vehicleId}")
+    public ResultDTO<?> getAppointmentsByVehicle(@PathVariable Long vehicleId) {
+        return appointmentService.getAppointmentsByVehicleId(vehicleId);
+    }
 }

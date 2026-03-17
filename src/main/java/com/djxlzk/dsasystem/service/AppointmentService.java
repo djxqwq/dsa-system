@@ -25,4 +25,6 @@ public interface AppointmentService {
     ResultDTO<?> getActiveAppointments(Long studentId);
 
     Appointment getById(Long id);
+
+    ResultDTO<?> getAppointmentsByVehicleId(Long vehicleId);
 }

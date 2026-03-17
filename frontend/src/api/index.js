@@ -69,6 +69,10 @@ export const appointmentApi = {
 
   getProfile() {
     return http.get('/api/user/student/profile')
+  },
+
+  getByVehicle(vehicleId) {
+    return http.get(`/api/appointment/vehicle/${vehicleId}`)
   }
 }
 

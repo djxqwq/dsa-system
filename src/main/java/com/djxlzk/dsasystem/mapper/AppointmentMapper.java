@@ -78,4 +78,13 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "ORDER BY a.create_time")
         List<String> findStudentNamesBySchedule(@Param("coachId") Long coachId, @Param("date") LocalDate date,
                         @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
+
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
+                        "FROM appointment a " +
+                        "LEFT JOIN student s ON a.student_id = s.id " +
+                        "LEFT JOIN coach c ON a.coach_id = c.id " +
+                        "LEFT JOIN vehicle v ON a.vehicle_id = v.id " +
+                        "WHERE a.vehicle_id = #{vehicleId} " +
+                        "ORDER BY a.appointment_date DESC, a.start_time DESC")
+        List<Appointment> findByVehicleId(@Param("vehicleId") Long vehicleId);
 }
