@@ -169,3 +169,9 @@ export const hoursApi = {
     return http.put(`/api/coach/student/${studentId}/requiredHours?requiredHours=${requiredHours}`)
   }
 }
+
+export const statsApi = {
+  getDashboardStats() {
+    return http.get('/api/stats/dashboard')
+  }
+}

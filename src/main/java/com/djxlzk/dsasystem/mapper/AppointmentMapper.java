@@ -112,4 +112,58 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "WHERE a.coach_id = #{coachId} AND a.status = 2 " +
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findCompletedByCoachId(@Param("coachId") Long coachId);
+
+        @Select("SELECT COUNT(*) FROM appointment WHERE DATE(appointment_date) = #{date}")
+        Long countByDate(@Param("date") LocalDate date);
+
+        @Select("SELECT COUNT(*) FROM appointment WHERE status = 0")
+        Long countPending();
+
+        @Select("SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)) / 60, 0) " +
+                        "FROM appointment WHERE DATE(appointment_date) = #{date} AND status = 2")
+        BigDecimal sumHoursByDate(@Param("date") LocalDate date);
+
+        @Select("SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)) / 60, 0) " +
+                        "FROM appointment WHERE status = 2")
+        BigDecimal sumTotalCompletedHours();
+
+        @Select("SELECT COUNT(*) FROM appointment WHERE status = 2")
+        Long countTotalCompletedSessions();
+
+        @Select("SELECT DATE(appointment_date) as date, COUNT(*) as bookings, " +
+                        "COALESCE(SUM(CASE WHEN status = 2 THEN TIMESTAMPDIFF(MINUTE, start_time, end_time) ELSE 0 END) / 60, 0) as hours, " +
+                        "SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) as completed, " +
+                        "SUM(CASE WHEN status = 3 THEN 1 ELSE 0 END) as cancelled " +
+                        "FROM appointment " +
+                        "WHERE DATE(appointment_date) BETWEEN #{startDate} AND #{endDate} " +
+                        "GROUP BY DATE(appointment_date) " +
+                        "ORDER BY DATE(appointment_date)")
+        List<java.util.Map<String, Object>> findDailyStats(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+        @Select("SELECT c.id as coachId, c.name as coachName, " +
+                        "COUNT(*) as totalSessions, " +
+                        "COALESCE(SUM(TIMESTAMPDIFF(MINUTE, a.start_time, a.end_time)) / 60, 0) as totalHours, " +
+                        "SUM(CASE WHEN a.status = 2 THEN 1 ELSE 0 END) as completedSessions " +
+                        "FROM appointment a " +
+                        "LEFT JOIN coach c ON a.coach_id = c.id " +
+                        "WHERE a.status IN (1, 2) " +
+                        "GROUP BY c.id, c.name " +
+                        "ORDER BY completedSessions DESC " +
+                        "LIMIT 5")
+        List<java.util.Map<String, Object>> findTopCoaches();
+
+        @Select("SELECT HOUR(start_time) as hour, COUNT(*) as count " +
+                        "FROM appointment " +
+                        "WHERE status = 2 " +
+                        "GROUP BY HOUR(start_time) " +
+                        "ORDER BY HOUR(start_time)")
+        List<java.util.Map<String, Object>> findHourlyDistribution();
+
+        @Select("SELECT " +
+                        "COUNT(CASE WHEN status = 1 THEN 1 END) as confirmed, " +
+                        "COUNT(CASE WHEN status = 2 THEN 1 END) as completed, " +
+                        "COUNT(CASE WHEN status = 4 THEN 1 END) as noShow, " +
+                        "COUNT(*) as total " +
+                        "FROM appointment")
+        java.util.Map<String, Object> getStatusStats();
 }
