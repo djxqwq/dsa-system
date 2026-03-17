@@ -124,4 +124,10 @@ public class MaintenanceRecordServiceImpl implements MaintenanceRecordService {
     public List<MaintenanceRecord> findByVehicleId(Long vehicleId) {
         return maintenanceRecordMapper.findByVehicleId(vehicleId);
     }
+
+    @Override
+    public ResultDTO<?> getAllRecords() {
+        List<MaintenanceRecord> records = maintenanceRecordMapper.findAllWithDetails();
+        return ResultDTO.success(records);
+    }
 }

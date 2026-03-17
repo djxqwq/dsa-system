@@ -128,4 +128,10 @@ public class RepairRecordServiceImpl implements RepairRecordService {
     public List<RepairRecord> findByVehicleId(Long vehicleId) {
         return repairRecordMapper.findByVehicleId(vehicleId);
     }
+
+    @Override
+    public ResultDTO<?> getAllRecords() {
+        List<RepairRecord> records = repairRecordMapper.findAllWithDetails();
+        return ResultDTO.success(records);
+    }
 }

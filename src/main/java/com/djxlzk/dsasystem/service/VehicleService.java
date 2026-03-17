@@ -14,7 +14,7 @@ public interface VehicleService {
 
     ResultDTO<?> updateVehicle(VehicleDTO vehicleDTO);
 
-    ResultDTO<?> listVehicles(String keyword, String vehicleType, Integer status, int page, int size);
+    ResultDTO<?> listVehicles(String keyword, String vehicleType, Integer status, Long coachId, int page, int size);
 
     ResultDTO<?> updateStatus(Long id, Integer status);
 

@@ -48,4 +48,9 @@ public class MaintenanceRecordController {
     public ResultDTO<?> getRecordsByVehicle(@PathVariable Long vehicleId) {
         return maintenanceRecordService.getRecordsByVehicleId(vehicleId);
     }
+
+    @GetMapping("/all")
+    public ResultDTO<?> getAllRecords() {
+        return maintenanceRecordService.getAllRecords();
+    }
 }

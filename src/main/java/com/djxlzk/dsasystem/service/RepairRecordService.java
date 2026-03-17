@@ -23,4 +23,6 @@ public interface RepairRecordService {
     List<RepairRecord> findByCoachId(Long coachId);
 
     List<RepairRecord> findByVehicleId(Long vehicleId);
+
+    ResultDTO<?> getAllRecords();
 }

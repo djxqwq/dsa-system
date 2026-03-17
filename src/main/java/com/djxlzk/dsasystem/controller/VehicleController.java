@@ -36,9 +36,10 @@ public class VehicleController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String vehicleType,
             @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Long coachId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return vehicleService.listVehicles(keyword, vehicleType, status, page, size);
+        return vehicleService.listVehicles(keyword, vehicleType, status, coachId, page, size);
     }
 
     @PutMapping("/status/{id}")

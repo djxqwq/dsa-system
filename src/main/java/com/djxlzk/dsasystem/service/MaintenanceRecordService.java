@@ -23,4 +23,6 @@ public interface MaintenanceRecordService {
     List<MaintenanceRecord> findByCoachId(Long coachId);
 
     List<MaintenanceRecord> findByVehicleId(Long vehicleId);
+
+    ResultDTO<?> getAllRecords();
 }

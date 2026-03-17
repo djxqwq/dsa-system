@@ -109,6 +109,10 @@ export const maintenanceApi = {
     return http.get(`/api/maintenance/vehicle/${vehicleId}`)
   },
 
+  getAll() {
+    return http.get('/api/maintenance/all')
+  },
+
   add(data) {
     return http.post('/api/maintenance', data)
   },
@@ -129,6 +133,10 @@ export const repairApi = {
 
   getByVehicle(vehicleId) {
     return http.get(`/api/repair/vehicle/${vehicleId}`)
+  },
+
+  getAll() {
+    return http.get('/api/repair/all')
   },
 
   add(data) {

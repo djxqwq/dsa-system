@@ -89,7 +89,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public ResultDTO<?> listVehicles(String keyword, String vehicleType, Integer status, int page, int size) {
+    public ResultDTO<?> listVehicles(String keyword, String vehicleType, Integer status, Long coachId, int page, int size) {
         Page<Vehicle> p = new Page<>(page, size);
         QueryWrapper<Vehicle> wrapper = new QueryWrapper<>();
         if (StringUtils.hasText(keyword)) {
@@ -100,6 +100,9 @@ public class VehicleServiceImpl implements VehicleService {
         }
         if (status != null) {
             wrapper.eq("status", status);
+        }
+        if (coachId != null) {
+            wrapper.eq("coach_id", coachId);
         }
         wrapper.orderByDesc("create_time");
         Page<Vehicle> result = vehicleMapper.selectPage(p, wrapper);
