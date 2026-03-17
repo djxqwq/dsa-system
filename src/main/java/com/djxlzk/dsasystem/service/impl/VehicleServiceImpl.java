@@ -148,4 +148,13 @@ public class VehicleServiceImpl implements VehicleService {
     public List<Vehicle> findByCarType(String carType) {
         return vehicleMapper.findByCarTypeWithCoachName(carType);
     }
+
+    @Override
+    public ResultDTO<?> getVehiclesByCoachId(Long coachId) {
+        QueryWrapper<Vehicle> wrapper = new QueryWrapper<>();
+        wrapper.eq("coach_id", coachId);
+        wrapper.orderByDesc("create_time");
+        List<Vehicle> vehicles = vehicleMapper.selectList(wrapper);
+        return ResultDTO.success(vehicles);
+    }
 }

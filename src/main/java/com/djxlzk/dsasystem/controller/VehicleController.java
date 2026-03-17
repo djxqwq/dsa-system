@@ -4,6 +4,7 @@ import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.dto.VehicleDTO;
 import com.djxlzk.dsasystem.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,5 +49,11 @@ public class VehicleController {
     @GetMapping("/all")
     public ResultDTO<?> getAllVehicles() {
         return ResultDTO.success(vehicleService.findAllWithCoachName());
+    }
+
+    @GetMapping("/coach")
+    public ResultDTO<?> getVehiclesByCoach(Authentication auth) {
+        Long coachId = (Long) auth.getPrincipal();
+        return vehicleService.getVehiclesByCoachId(coachId);
     }
 }

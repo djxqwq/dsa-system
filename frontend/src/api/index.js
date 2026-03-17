@@ -89,5 +89,53 @@ export const vehicleApi = {
 
   getAll() {
     return http.get('/api/vehicle/all')
+  },
+
+  getByCoach() {
+    return http.get('/api/vehicle/coach')
+  }
+}
+
+export const maintenanceApi = {
+  getByCoach() {
+    return http.get('/api/maintenance/coach')
+  },
+
+  getByVehicle(vehicleId) {
+    return http.get(`/api/maintenance/vehicle/${vehicleId}`)
+  },
+
+  add(data) {
+    return http.post('/api/maintenance', data)
+  },
+
+  update(data) {
+    return http.put('/api/maintenance', data)
+  },
+
+  delete(id) {
+    return http.delete(`/api/maintenance/${id}`)
+  }
+}
+
+export const repairApi = {
+  getByCoach() {
+    return http.get('/api/repair/coach')
+  },
+
+  getByVehicle(vehicleId) {
+    return http.get(`/api/repair/vehicle/${vehicleId}`)
+  },
+
+  add(data) {
+    return http.post('/api/repair', data)
+  },
+
+  update(data) {
+    return http.put('/api/repair', data)
+  },
+
+  delete(id) {
+    return http.delete(`/api/repair/${id}`)
   }
 }

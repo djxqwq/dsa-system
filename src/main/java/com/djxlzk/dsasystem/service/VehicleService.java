@@ -21,4 +21,6 @@ public interface VehicleService {
     List<Vehicle> findAllWithCoachName();
 
     List<Vehicle> findByCarType(String carType);
+
+    ResultDTO<?> getVehiclesByCoachId(Long coachId);
 }
