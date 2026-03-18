@@ -75,13 +75,8 @@ public class StatsServiceImpl implements StatsService {
                 Long completed = statusStats.get("completed") != null ? ((Number) statusStats.get("completed")).longValue() : 0L;
                 Long noShow = statusStats.get("noShow") != null ? ((Number) statusStats.get("noShow")).longValue() : 0L;
 
-                Long totalProcessed = confirmed + completed;
-                if (totalProcessed > 0) {
-                    stats.setConfirmRate((double) completed / totalProcessed * 100);
-                } else {
-                    stats.setConfirmRate(0.0);
-                }
-
+                Long totalConfirmed = confirmed + completed;
+                stats.setConfirmRate((double) totalConfirmed / total * 100);
                 stats.setCompletionRate((double) completed / total * 100);
                 stats.setNoShowRate((double) noShow / total * 100);
             } else {

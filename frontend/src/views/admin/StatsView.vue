@@ -291,6 +291,12 @@ const initCharts = () => {
 }
 
 const updateCharts = () => {
+  if (!trendChart && trendChartRef.value) {
+    trendChart = echarts.init(trendChartRef.value)
+  }
+  if (!hourlyChart && hourlyChartRef.value) {
+    hourlyChart = echarts.init(hourlyChartRef.value)
+  }
   updateTrendChart()
   updateHourlyChart()
 }

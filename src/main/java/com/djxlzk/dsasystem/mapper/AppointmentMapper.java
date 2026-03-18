@@ -154,7 +154,7 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
 
         @Select("SELECT HOUR(start_time) as hour, COUNT(*) as count " +
                         "FROM appointment " +
-                        "WHERE status = 2 " +
+                        "WHERE status IN (1, 2) " +
                         "GROUP BY HOUR(start_time) " +
                         "ORDER BY HOUR(start_time)")
         List<java.util.Map<String, Object>> findHourlyDistribution();
