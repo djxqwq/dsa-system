@@ -1,6 +1,7 @@
 package com.djxlzk.dsasystem.service.impl;
 
 import com.djxlzk.dsasystem.dto.AppointmentCreateDTO;
+import com.djxlzk.dsasystem.dto.AppointmentUpdateDTO;
 import com.djxlzk.dsasystem.dto.HoursRecordDTO;
 import com.djxlzk.dsasystem.dto.HoursStatsDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
@@ -399,5 +400,46 @@ public class AppointmentServiceImpl implements AppointmentService {
     public ResultDTO<?> getAllAppointments() {
         List<Appointment> appointments = appointmentMapper.findAllWithDetails();
         return ResultDTO.success(appointments);
+    }
+
+    @Override
+    public ResultDTO<?> deleteAppointment(Long id) {
+        Appointment appointment = appointmentMapper.selectById(id);
+        if (appointment == null) {
+            return ResultDTO.error(404, "预约记录不存在");
+        }
+        appointmentMapper.deleteById(id);
+        return ResultDTO.success("删除成功");
+    }
+
+    @Override
+    public ResultDTO<?> updateAppointment(AppointmentUpdateDTO dto) {
+        if (dto.getId() == null) {
+            return ResultDTO.error(400, "预约ID不能为空");
+        }
+        Appointment appointment = appointmentMapper.selectById(dto.getId());
+        if (appointment == null) {
+            return ResultDTO.error(404, "预约记录不存在");
+        }
+        if (dto.getVehicleId() != null) {
+            appointment.setVehicleId(dto.getVehicleId());
+        }
+        if (dto.getAppointmentDate() != null) {
+            appointment.setAppointmentDate(LocalDate.parse(dto.getAppointmentDate()));
+        }
+        if (dto.getStartTime() != null) {
+            appointment.setStartTime(LocalTime.parse(dto.getStartTime()));
+        }
+        if (dto.getEndTime() != null) {
+            appointment.setEndTime(LocalTime.parse(dto.getEndTime()));
+        }
+        if (dto.getStatus() != null) {
+            appointment.setStatus(dto.getStatus());
+        }
+        if (dto.getRemark() != null) {
+            appointment.setRemark(dto.getRemark());
+        }
+        appointmentMapper.updateById(appointment);
+        return ResultDTO.success("更新成功");
     }
 }

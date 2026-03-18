@@ -1,6 +1,7 @@
 package com.djxlzk.dsasystem.service;
 
 import com.djxlzk.dsasystem.dto.AppointmentCreateDTO;
+import com.djxlzk.dsasystem.dto.AppointmentUpdateDTO;
 import com.djxlzk.dsasystem.dto.HoursRecordDTO;
 import com.djxlzk.dsasystem.dto.HoursStatsDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
@@ -39,4 +40,8 @@ public interface AppointmentService {
     ResultDTO<List<HoursRecordDTO>> getCoachHoursRecords(Long coachId);
 
     ResultDTO<?> getAllAppointments();
+
+    ResultDTO<?> deleteAppointment(Long id);
+
+    ResultDTO<?> updateAppointment(AppointmentUpdateDTO dto);
 }

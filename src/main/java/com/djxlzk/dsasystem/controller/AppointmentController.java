@@ -1,6 +1,7 @@
 package com.djxlzk.dsasystem.controller;
 
 import com.djxlzk.dsasystem.dto.AppointmentCreateDTO;
+import com.djxlzk.dsasystem.dto.AppointmentUpdateDTO;
 import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,5 +101,15 @@ public class AppointmentController {
     @GetMapping("/all")
     public ResultDTO<?> getAllAppointments() {
         return appointmentService.getAllAppointments();
+    }
+
+    @DeleteMapping("/admin/{id}")
+    public ResultDTO<?> deleteAppointment(@PathVariable Long id) {
+        return appointmentService.deleteAppointment(id);
+    }
+
+    @PutMapping("/admin")
+    public ResultDTO<?> updateAppointment(@RequestBody AppointmentUpdateDTO dto) {
+        return appointmentService.updateAppointment(dto);
     }
 }

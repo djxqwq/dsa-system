@@ -180,7 +180,13 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="remark" label="备注" min-width="150" />
+            <el-table-column prop="remark" label="备注" min-width="120" />
+            <el-table-column label="操作" width="130" fixed="right">
+              <template #default="scope">
+                <el-button size="small" type="primary" plain @click="editUsageRecord(scope.row)">编辑</el-button>
+                <el-button size="small" type="danger" @click="deleteUsageRecord(scope.row.id)">删除</el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="保养记录" name="maintenance">
@@ -195,7 +201,13 @@
               </template>
             </el-table-column>
             <el-table-column prop="mileage" label="里程(km)" width="100" />
-            <el-table-column prop="description" label="描述" min-width="150" />
+            <el-table-column prop="description" label="描述" min-width="120" />
+            <el-table-column label="操作" width="130" fixed="right">
+              <template #default="scope">
+                <el-button size="small" type="primary" plain @click="editMaintenanceRecord(scope.row)">编辑</el-button>
+                <el-button size="small" type="danger" @click="deleteMaintenanceRecord(scope.row.id)">删除</el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="维修记录" name="repair">
@@ -217,10 +229,111 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="description" label="描述" min-width="150" />
+            <el-table-column prop="description" label="描述" min-width="120" />
+            <el-table-column label="操作" width="130" fixed="right">
+              <template #default="scope">
+                <el-button size="small" type="primary" plain @click="editRepairRecord(scope.row)">编辑</el-button>
+                <el-button size="small" type="danger" @click="deleteRepairRecord(scope.row.id)">删除</el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </el-tab-pane>
       </el-tabs>
+    </el-dialog>
+
+    <el-dialog v-model="editUsageDialogVisible" title="编辑使用记录" width="500">
+      <el-form :model="editUsageForm" label-width="80px">
+        <el-form-item label="日期">
+          <el-date-picker v-model="editUsageForm.appointmentDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="开始时间">
+          <el-time-select v-model="editUsageForm.startTime" start="06:00" step="00:30" end="22:00" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="结束时间">
+          <el-time-select v-model="editUsageForm.endTime" start="06:00" step="00:30" end="22:00" :min-time="editUsageForm.startTime" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="editUsageForm.status" style="width: 100%">
+            <el-option label="待确认" :value="0" />
+            <el-option label="已确认" :value="1" />
+            <el-option label="已完成" :value="2" />
+            <el-option label="已取消" :value="3" />
+            <el-option label="爽约" :value="4" />
+            <el-option label="已拒绝" :value="5" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="editUsageForm.remark" type="textarea" :rows="2" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editUsageDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEditUsage" :loading="editSubmitting">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="editMaintenanceDialogVisible" title="编辑保养记录" width="500">
+      <el-form :model="editMaintenanceForm" label-width="80px">
+        <el-form-item label="教练">
+          <el-select v-model="editMaintenanceForm.coachId" style="width: 100%" placeholder="请选择教练" clearable filterable>
+            <el-option v-for="coach in coaches" :key="coach.id" :label="`${coach.name} (${coach.coachNo})`" :value="coach.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="保养类型">
+          <el-input v-model="editMaintenanceForm.maintenanceType" />
+        </el-form-item>
+        <el-form-item label="保养日期">
+          <el-date-picker v-model="editMaintenanceForm.maintenanceDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="费用">
+          <el-input-number v-model="editMaintenanceForm.cost" :precision="2" :min="0" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="里程(km)">
+          <el-input-number v-model="editMaintenanceForm.mileage" :min="0" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="editMaintenanceForm.description" type="textarea" :rows="2" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editMaintenanceDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEditMaintenance" :loading="editSubmitting">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="editRepairDialogVisible" title="编辑维修记录" width="500">
+      <el-form :model="editRepairForm" label-width="80px">
+        <el-form-item label="教练">
+          <el-select v-model="editRepairForm.coachId" style="width: 100%" placeholder="请选择教练" clearable filterable>
+            <el-option v-for="coach in coaches" :key="coach.id" :label="`${coach.name} (${coach.coachNo})`" :value="coach.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="维修类型">
+          <el-input v-model="editRepairForm.repairType" />
+        </el-form-item>
+        <el-form-item label="维修日期">
+          <el-date-picker v-model="editRepairForm.repairDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="费用">
+          <el-input-number v-model="editRepairForm.cost" :precision="2" :min="0" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="维修店">
+          <el-input v-model="editRepairForm.repairShop" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="editRepairForm.status" style="width: 100%">
+            <el-option label="进行中" :value="0" />
+            <el-option label="已完成" :value="1" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="editRepairForm.description" type="textarea" :rows="2" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editRepairDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEditRepair" :loading="editSubmitting">确定</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -261,6 +374,43 @@ const allUsageRecords = ref([])
 const allMaintenanceRecords = ref([])
 const allRepairRecords = ref([])
 const allRecordsLoading = ref(false)
+
+const editUsageDialogVisible = ref(false)
+const editMaintenanceDialogVisible = ref(false)
+const editRepairDialogVisible = ref(false)
+const editSubmitting = ref(false)
+
+const editUsageForm = ref({
+  id: null,
+  appointmentDate: '',
+  startTime: '',
+  endTime: '',
+  status: 0,
+  remark: ''
+})
+
+const editMaintenanceForm = ref({
+  id: null,
+  vehicleId: null,
+  coachId: null,
+  maintenanceType: '',
+  maintenanceDate: '',
+  cost: null,
+  mileage: null,
+  description: ''
+})
+
+const editRepairForm = ref({
+  id: null,
+  vehicleId: null,
+  coachId: null,
+  repairType: '',
+  repairDate: '',
+  cost: null,
+  repairShop: '',
+  status: 0,
+  description: ''
+})
 
 const form = ref({
   id: null,
@@ -449,6 +599,173 @@ const showAllRecords = async () => {
     ElMessage.error('获取记录失败')
   } finally {
     allRecordsLoading.value = false
+  }
+}
+
+const deleteUsageRecord = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要删除该使用记录吗？', '提示', { type: 'warning' })
+    const res = await http.delete(`/api/appointment/admin/${id}`)
+    if (res.data.code === 200) {
+      ElMessage.success(res.data.msg)
+      allUsageRecords.value = allUsageRecords.value.filter(r => r.id !== id)
+    } else {
+      ElMessage.error(res.data.msg)
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+const deleteMaintenanceRecord = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要删除该保养记录吗？', '提示', { type: 'warning' })
+    const res = await http.delete(`/api/maintenance/${id}`)
+    if (res.data.code === 200) {
+      ElMessage.success(res.data.msg)
+      allMaintenanceRecords.value = allMaintenanceRecords.value.filter(r => r.id !== id)
+    } else {
+      ElMessage.error(res.data.msg)
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+const deleteRepairRecord = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要删除该维修记录吗？', '提示', { type: 'warning' })
+    const res = await http.delete(`/api/repair/${id}`)
+    if (res.data.code === 200) {
+      ElMessage.success(res.data.msg)
+      allRepairRecords.value = allRepairRecords.value.filter(r => r.id !== id)
+    } else {
+      ElMessage.error(res.data.msg)
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+const editUsageRecord = (row) => {
+  editUsageForm.value = {
+    id: row.id,
+    appointmentDate: row.appointmentDate,
+    startTime: row.startTime?.substring(0, 5),
+    endTime: row.endTime?.substring(0, 5),
+    status: row.status,
+    remark: row.remark || ''
+  }
+  editUsageDialogVisible.value = true
+}
+
+const editMaintenanceRecord = (row) => {
+  editMaintenanceForm.value = {
+    id: row.id,
+    vehicleId: row.vehicleId,
+    coachId: row.coachId,
+    maintenanceType: row.maintenanceType,
+    maintenanceDate: row.maintenanceDate,
+    cost: row.cost,
+    mileage: row.mileage,
+    description: row.description || ''
+  }
+  editMaintenanceDialogVisible.value = true
+}
+
+const editRepairRecord = (row) => {
+  editRepairForm.value = {
+    id: row.id,
+    vehicleId: row.vehicleId,
+    coachId: row.coachId,
+    repairType: row.repairType,
+    repairDate: row.repairDate,
+    cost: row.cost,
+    repairShop: row.repairShop || '',
+    status: row.status,
+    description: row.description || ''
+  }
+  editRepairDialogVisible.value = true
+}
+
+const submitEditUsage = async () => {
+  editSubmitting.value = true
+  try {
+    const res = await http.put('/api/appointment/admin', editUsageForm.value)
+    if (res.data.code === 200) {
+      ElMessage.success(res.data.msg)
+      editUsageDialogVisible.value = false
+      const idx = allUsageRecords.value.findIndex(r => r.id === editUsageForm.value.id)
+      if (idx !== -1) {
+        allUsageRecords.value[idx] = { ...allUsageRecords.value[idx], ...editUsageForm.value }
+      }
+    } else {
+      ElMessage.error(res.data.msg)
+    }
+  } catch (e) {
+    ElMessage.error('更新失败')
+  } finally {
+    editSubmitting.value = false
+  }
+}
+
+const submitEditMaintenance = async () => {
+  editSubmitting.value = true
+  try {
+    const res = await http.put('/api/maintenance', editMaintenanceForm.value)
+    if (res.data.code === 200) {
+      ElMessage.success(res.data.msg)
+      editMaintenanceDialogVisible.value = false
+      const idx = allMaintenanceRecords.value.findIndex(r => r.id === editMaintenanceForm.value.id)
+      if (idx !== -1) {
+        const coach = coaches.value.find(c => c.id === editMaintenanceForm.value.coachId)
+        allMaintenanceRecords.value[idx] = { 
+          ...allMaintenanceRecords.value[idx], 
+          ...editMaintenanceForm.value,
+          coachId: editMaintenanceForm.value.coachId,
+          coachName: coach ? coach.name : null
+        }
+      }
+    } else {
+      ElMessage.error(res.data.msg)
+    }
+  } catch (e) {
+    ElMessage.error('更新失败')
+  } finally {
+    editSubmitting.value = false
+  }
+}
+
+const submitEditRepair = async () => {
+  editSubmitting.value = true
+  try {
+    const res = await http.put('/api/repair', editRepairForm.value)
+    if (res.data.code === 200) {
+      ElMessage.success(res.data.msg)
+      editRepairDialogVisible.value = false
+      const idx = allRepairRecords.value.findIndex(r => r.id === editRepairForm.value.id)
+      if (idx !== -1) {
+        const coach = coaches.value.find(c => c.id === editRepairForm.value.coachId)
+        allRepairRecords.value[idx] = { 
+          ...allRepairRecords.value[idx], 
+          ...editRepairForm.value,
+          coachId: editRepairForm.value.coachId,
+          coachName: coach ? coach.name : null
+        }
+      }
+    } else {
+      ElMessage.error(res.data.msg)
+    }
+  } catch (e) {
+    ElMessage.error('更新失败')
+  } finally {
+    editSubmitting.value = false
   }
 }
 
