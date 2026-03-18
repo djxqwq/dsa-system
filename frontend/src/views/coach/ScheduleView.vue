@@ -102,7 +102,12 @@
           </div>
         </el-form-item>
         <el-form-item label="可约名额">
-          <el-input-number v-model="form.capacity" :min="1" :max="4" style="width: 100%" />
+          <div style="width: 100%">
+            <el-input-number v-model="form.capacity" :min="isEdit ? form.bookedCount : 1" :max="4" style="width: 100%" />
+            <div v-if="isEdit && form.bookedCount > 0" class="booked-tip">
+              当前已预约 {{ form.bookedCount }} 人，名额不能少于此数
+            </div>
+          </div>
         </el-form-item>
         <el-form-item label="状态">
           <el-switch v-model="form.statusActive" active-text="开放" inactive-text="关闭" />
@@ -158,7 +163,8 @@ const form = ref({
   startTime: '',
   endTime: '',
   capacity: 3,
-  statusActive: true
+  statusActive: true,
+  bookedCount: 0
 })
 
 function formatDate(date) {
@@ -262,7 +268,8 @@ function openAddDialog() {
     startTime: '',
     endTime: '',
     capacity: 3,
-    statusActive: true
+    statusActive: true,
+    bookedCount: 0
   }
   dialogVisible.value = true
 }
@@ -274,8 +281,9 @@ function openEditDialog(row) {
     scheduleDate: row.scheduleDate,
     startTime: row.startTime,
     endTime: row.endTime,
-    capacity: row.capacity,
-    statusActive: row.status === 1
+    capacity: row.capacity || 3,
+    statusActive: row.status === 1,
+    bookedCount: row.bookedCount || 0
   }
   dialogVisible.value = true
 }
@@ -295,6 +303,11 @@ async function submitForm() {
     const duration = calculateDuration()
     if (duration < 2) {
       ElMessage.warning('排班时长最少2小时')
+      return
+    }
+  } else {
+    if (form.value.capacity < form.value.bookedCount) {
+      ElMessage.warning(`名额容量不能小于已预约人数（${form.value.bookedCount}人）`)
       return
     }
   }
@@ -511,6 +524,12 @@ onMounted(() => {
   padding: 8px 12px;
   background: rgba(79, 140, 255, 0.2);
   border-radius: 6px;
+}
+
+.booked-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #e6a23c;
 }
 
 .animate-in {

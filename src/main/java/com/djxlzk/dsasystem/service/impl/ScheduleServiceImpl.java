@@ -96,6 +96,10 @@ public class ScheduleServiceImpl implements ScheduleService {
             existing.setEndTime(LocalTime.parse(dto.getEndTime()));
         }
         if (dto.getCapacity() != null) {
+            int bookedCount = existing.getBookedCount() != null ? existing.getBookedCount() : 0;
+            if (dto.getCapacity() < bookedCount) {
+                return ResultDTO.error(400, "名额容量不能小于已预约人数（" + bookedCount + "人）");
+            }
             existing.setCapacity(dto.getCapacity());
         }
         if (dto.getStatus() != null) {
