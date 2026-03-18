@@ -166,4 +166,12 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "COUNT(*) as total " +
                         "FROM appointment")
         java.util.Map<String, Object> getStatusStats();
+
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
+                        "FROM appointment a " +
+                        "LEFT JOIN student s ON a.student_id = s.id " +
+                        "LEFT JOIN coach c ON a.coach_id = c.id " +
+                        "LEFT JOIN vehicle v ON a.vehicle_id = v.id " +
+                        "ORDER BY a.appointment_date DESC, a.start_time DESC")
+        List<Appointment> findAllWithDetails();
 }

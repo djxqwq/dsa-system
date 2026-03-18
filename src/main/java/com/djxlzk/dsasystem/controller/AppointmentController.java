@@ -96,4 +96,9 @@ public class AppointmentController {
     public ResultDTO<?> getStudentHoursStatsById(@RequestParam Long studentId) {
         return appointmentService.getStudentHoursStats(studentId);
     }
+
+    @GetMapping("/all")
+    public ResultDTO<?> getAllAppointments() {
+        return appointmentService.getAllAppointments();
+    }
 }

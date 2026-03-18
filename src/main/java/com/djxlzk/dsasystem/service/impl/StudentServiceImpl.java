@@ -165,6 +165,7 @@ public class StudentServiceImpl implements StudentService {
         }
         exist.setUserName(studentDTO.getUserName() != null ? studentDTO.getUserName() : exist.getUserName());
         exist.setMobile(studentDTO.getMobile() != null ? studentDTO.getMobile() : exist.getMobile());
+        exist.setStudentNo(studentDTO.getStudentNo() != null ? studentDTO.getStudentNo() : exist.getStudentNo());
         if (studentDTO.getStatus() != null) {
             exist.setStatus(studentDTO.getStatus());
         }
@@ -191,12 +192,13 @@ public class StudentServiceImpl implements StudentService {
         if (StringUtils.hasText(keyword)) {
             wrapper.and(w -> w
                 .like("user_name", keyword)
-                .or().like("mobile", keyword));
+                .or().like("mobile", keyword)
+                .or().like("student_no", keyword));
         }
         if (status != null) {
             wrapper.eq("status", status);
         }
-        wrapper.orderByDesc("create_time");
+        wrapper.orderByAsc("student_no");
         Page<Student> result = studentMapper.selectPage(p, wrapper);
         Map<String, Object> data = new HashMap<>();
         data.put("records", result.getRecords());

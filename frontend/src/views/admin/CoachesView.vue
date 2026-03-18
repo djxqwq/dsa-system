@@ -13,9 +13,9 @@
       </div>
 
       <el-table v-loading="loading" :data="rows" style="width: 100%" class="table">
+        <el-table-column prop="coachNo" label="工号" width="120" />
         <el-table-column prop="name" label="姓名" width="120" />
         <el-table-column prop="mobile" label="手机号" width="140" />
-        <el-table-column prop="coachNo" label="工号" width="120" />
         <el-table-column prop="createTime" label="创建时间" width="180">
           <template #default="scope">
             {{ formatTime(scope.row.createTime) }}

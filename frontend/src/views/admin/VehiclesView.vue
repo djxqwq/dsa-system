@@ -18,6 +18,7 @@
         </el-select>
         <el-button type="primary" plain @click="fetchList">查询</el-button>
         <el-button type="primary" @click="openDialog()">新增车辆</el-button>
+        <el-button type="success" @click="showAllRecords">全部记录</el-button>
       </div>
 
       <el-table :data="rows" style="width: 100%" class="table" v-loading="loading">
@@ -158,6 +159,69 @@
         <el-table-column prop="description" label="描述" min-width="150" />
       </el-table>
     </el-dialog>
+
+    <el-dialog v-model="allRecordsDialogVisible" title="全部车辆记录" width="1100px" top="5vh">
+      <el-tabs v-model="activeRecordTab">
+        <el-tab-pane label="使用记录" name="usage">
+          <el-table :data="allUsageRecords" style="width: 100%" v-loading="allRecordsLoading" max-height="450">
+            <el-table-column prop="plateNumber" label="车牌号" width="120" />
+            <el-table-column prop="coachName" label="教练" width="100" />
+            <el-table-column prop="studentName" label="学员" width="100" />
+            <el-table-column prop="appointmentDate" label="日期" width="120" />
+            <el-table-column label="时间段" width="130">
+              <template #default="scope">
+                {{ scope.row.startTime?.substring(0, 5) }} - {{ scope.row.endTime?.substring(0, 5) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="80">
+              <template #default="scope">
+                <el-tag :type="getAppointmentStatusType(scope.row.status)" effect="dark" size="small">
+                  {{ getAppointmentStatusText(scope.row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="remark" label="备注" min-width="150" />
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="保养记录" name="maintenance">
+          <el-table :data="allMaintenanceRecords" style="width: 100%" v-loading="allRecordsLoading" max-height="450">
+            <el-table-column prop="plateNumber" label="车牌号" width="120" />
+            <el-table-column prop="coachName" label="教练" width="100" />
+            <el-table-column prop="maintenanceType" label="保养类型" width="120" />
+            <el-table-column prop="maintenanceDate" label="保养日期" width="120" />
+            <el-table-column label="费用" width="100">
+              <template #default="scope">
+                {{ scope.row.cost ? `¥${scope.row.cost}` : '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="mileage" label="里程(km)" width="100" />
+            <el-table-column prop="description" label="描述" min-width="150" />
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="维修记录" name="repair">
+          <el-table :data="allRepairRecords" style="width: 100%" v-loading="allRecordsLoading" max-height="450">
+            <el-table-column prop="plateNumber" label="车牌号" width="120" />
+            <el-table-column prop="coachName" label="教练" width="100" />
+            <el-table-column prop="repairType" label="维修类型" width="120" />
+            <el-table-column prop="repairDate" label="维修日期" width="120" />
+            <el-table-column label="费用" width="100">
+              <template #default="scope">
+                {{ scope.row.cost ? `¥${scope.row.cost}` : '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="repairShop" label="维修店" width="120" />
+            <el-table-column label="状态" width="80">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" effect="dark" size="small">
+                  {{ scope.row.status === 1 ? '已完成' : '进行中' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="description" label="描述" min-width="150" />
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
   </div>
 </template>
 
@@ -190,6 +254,13 @@ const maintenanceLoading = ref(false)
 const repairDialogVisible = ref(false)
 const repairRecords = ref([])
 const repairLoading = ref(false)
+
+const allRecordsDialogVisible = ref(false)
+const activeRecordTab = ref('usage')
+const allUsageRecords = ref([])
+const allMaintenanceRecords = ref([])
+const allRepairRecords = ref([])
+const allRecordsLoading = ref(false)
 
 const form = ref({
   id: null,
@@ -359,6 +430,25 @@ const showRepair = async (row) => {
     ElMessage.error('获取维修记录失败')
   } finally {
     repairLoading.value = false
+  }
+}
+
+const showAllRecords = async () => {
+  allRecordsDialogVisible.value = true
+  allRecordsLoading.value = true
+  try {
+    const [usageRes, maintenanceRes, repairRes] = await Promise.all([
+      http.get('/api/appointment/all'),
+      http.get('/api/maintenance/all'),
+      http.get('/api/repair/all')
+    ])
+    allUsageRecords.value = usageRes.data.code === 200 ? (usageRes.data.data || []) : []
+    allMaintenanceRecords.value = maintenanceRes.data.code === 200 ? (maintenanceRes.data.data || []) : []
+    allRepairRecords.value = repairRes.data.code === 200 ? (repairRes.data.data || []) : []
+  } catch (e) {
+    ElMessage.error('获取记录失败')
+  } finally {
+    allRecordsLoading.value = false
   }
 }
 

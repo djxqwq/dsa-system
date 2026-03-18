@@ -7,9 +7,9 @@
       </div>
 
       <div class="tools">
-        <el-input v-model="keyword" style="width: 240px" placeholder="搜索姓名/手机号" clearable @keyup.enter="search" />
+        <el-input v-model="keyword" style="width: 240px" placeholder="搜索姓名/手机号/学号" clearable @keyup.enter="search" />
         <el-select v-model="status" style="width: 160px" placeholder="状态" clearable>
-          <el-option label="全部" :value="null" />
+          <el-option label="全部" value="" />
           <el-option label="正常" :value="1" />
           <el-option label="禁用" :value="0" />
         </el-select>
@@ -18,6 +18,11 @@
       </div>
 
       <el-table v-loading="loading" :data="rows" style="width: 100%" class="table">
+        <el-table-column prop="studentNo" label="学号" width="120">
+          <template #default="scope">
+            {{ scope.row.studentNo || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="userName" label="姓名" width="120" />
         <el-table-column prop="mobile" label="手机号" width="140" />
         <el-table-column prop="carType" label="车型" width="80">
@@ -75,6 +80,9 @@
       @close="resetForm"
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="96px">
+        <el-form-item label="学号" prop="studentNo">
+          <el-input v-model="form.studentNo" placeholder="请输入学号" />
+        </el-form-item>
         <el-form-item label="姓名" prop="userName">
           <el-input v-model="form.userName" placeholder="请输入姓名" />
         </el-form-item>
@@ -117,7 +125,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import http from '../../api/http.js'
 
 const keyword = ref('')
-const status = ref(null)
+const status = ref('')
 const rows = ref([])
 const loading = ref(false)
 const page = ref(1)
@@ -129,6 +137,7 @@ const formRef = ref(null)
 
 const form = reactive({
   id: null,
+  studentNo: '',
   userName: '',
   mobile: '',
   password: '',
@@ -155,9 +164,11 @@ function formatTime(val) {
 async function fetch() {
   loading.value = true
   try {
-    const res = await http.get('/api/student/list', {
-      params: { keyword: keyword.value, status: status.value, page: page.value, size: pageSize.value }
-    })
+    const params = { keyword: keyword.value, page: page.value, size: pageSize.value }
+    if (status.value !== '') {
+      params.status = status.value
+    }
+    const res = await http.get('/api/student/list', { params })
     if (res.data.code === 200) {
       rows.value = res.data.data.records || []
       total.value = res.data.data.total || 0
@@ -190,6 +201,7 @@ function onSizeChange() {
 
 function openAdd() {
   form.id = null
+  form.studentNo = ''
   form.userName = ''
   form.mobile = ''
   form.password = ''
@@ -201,6 +213,7 @@ function openAdd() {
 
 function openEdit(row) {
   form.id = row.id
+  form.studentNo = row.studentNo || ''
   form.userName = row.userName || ''
   form.mobile = row.mobile || ''
   form.password = ''
@@ -222,6 +235,7 @@ async function submit() {
     const method = form.id ? 'put' : 'post'
     const body = {
       id: form.id,
+      studentNo: form.studentNo,
       userName: form.userName,
       mobile: form.mobile,
       carType: form.carType,
@@ -274,6 +288,7 @@ async function setStatus(row, newStatus) {
   try {
     const res = await http.put('/api/student', {
       id: row.id,
+      studentNo: row.studentNo,
       userName: row.userName,
       mobile: row.mobile,
       carType: row.carType,

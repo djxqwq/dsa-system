@@ -22,6 +22,12 @@ public class Student {
     private Long id;
 
     /**
+     * 学号
+     */
+    @TableField("student_no")
+    private String studentNo;
+
+    /**
      * 手机号
      */
     private String mobile;

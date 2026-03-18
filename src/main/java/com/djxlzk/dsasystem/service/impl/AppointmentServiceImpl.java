@@ -394,4 +394,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         
         return record;
     }
+
+    @Override
+    public ResultDTO<?> getAllAppointments() {
+        List<Appointment> appointments = appointmentMapper.findAllWithDetails();
+        return ResultDTO.success(appointments);
+    }
 }

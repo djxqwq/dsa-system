@@ -9,7 +9,7 @@
       <div class="tools">
         <el-input 
           v-model="searchKeyword" 
-          placeholder="搜索学员姓名/手机号" 
+          placeholder="搜索学员姓名/手机号/学号" 
           clearable 
           style="width: 220px"
           @keyup.enter="handleSearch"
@@ -28,6 +28,11 @@
         v-loading="loading"
         empty-text="暂无学员数据"
       >
+        <el-table-column prop="studentNo" label="学号" width="120">
+          <template #default="scope">
+            {{ scope.row.studentNo || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="userName" label="学员姓名" width="120" />
         <el-table-column prop="mobile" label="手机号" width="140" />
         <el-table-column prop="carType" label="车型" width="80">

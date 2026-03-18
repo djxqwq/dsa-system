@@ -37,4 +37,6 @@ public interface AppointmentService {
     ResultDTO<List<HoursRecordDTO>> getStudentHoursRecords(Long studentId);
 
     ResultDTO<List<HoursRecordDTO>> getCoachHoursRecords(Long coachId);
+
+    ResultDTO<?> getAllAppointments();
 }

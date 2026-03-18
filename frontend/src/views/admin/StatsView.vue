@@ -207,6 +207,7 @@ import {
 } from '@element-plus/icons-vue'
 import { statsApi } from '../../api/index'
 import * as echarts from 'echarts'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const stats = ref({
@@ -257,9 +258,24 @@ const refreshData = async () => {
     if (res.data && res.data.data) {
       stats.value = res.data.data
       updateCharts()
+    } else {
+      ElMessage.error('获取统计数据失败：返回数据格式错误')
     }
   } catch (error) {
     console.error('获取统计数据失败:', error)
+    if (error.response) {
+      if (error.response.status === 403) {
+        ElMessage.error('权限不足：请确认您以管理员身份登录')
+      } else if (error.response.status === 401) {
+        ElMessage.error('登录已过期，请重新登录')
+      } else {
+        ElMessage.error(`获取统计数据失败：${error.response.data?.message || error.message}`)
+      }
+    } else if (error.request) {
+      ElMessage.error('网络错误：无法连接到服务器，请检查后端服务是否启动')
+    } else {
+      ElMessage.error(`请求失败：${error.message}`)
+    }
   } finally {
     loading.value = false
   }
