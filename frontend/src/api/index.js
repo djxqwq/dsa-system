@@ -54,6 +54,10 @@ export const appointmentApi = {
     return http.put(`/api/appointment/noshow/${id}`)
   },
 
+  undoComplete(id) {
+    return http.put(`/api/appointment/undo/${id}`)
+  },
+
   getStudentAppointments() {
     return http.get('/api/appointment/student')
   },

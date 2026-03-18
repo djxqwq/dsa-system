@@ -52,7 +52,7 @@
 
         <div class="tips">
           <div class="tip">学员端：预约练车、查学时、看历史</div>
-          <div class="tip">教练端：排班、确认预约、学时记录</div>
+          <div class="tip">教练端：排班、确认预约、学时管理</div>
           <div class="tip">管理员端：用户/教练/车辆/统计/配置</div>
         </div>
       </el-form>

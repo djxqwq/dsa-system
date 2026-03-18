@@ -23,6 +23,8 @@ public interface AppointmentService {
 
     ResultDTO<?> markNoShow(Long id, Long coachId);
 
+    ResultDTO<?> undoComplete(Long id, Long coachId);
+
     ResultDTO<?> getStudentAppointments(Long studentId);
 
     ResultDTO<?> getCoachAppointments(Long coachId, Integer status);

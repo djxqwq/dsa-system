@@ -2,8 +2,8 @@
   <div class="grid">
     <div class="glass card">
       <div class="head">
-        <div class="h">学时记录</div>
-        <div class="s">查看学员训练学时记录，形成可追溯明细</div>
+        <div class="h">学时管理</div>
+        <div class="s">管理学员预约与学时记录</div>
       </div>
 
       <div class="stats">
@@ -45,22 +45,44 @@
             {{ formatDate(scope.row.date) }}
           </template>
         </el-table-column>
-        <el-table-column prop="studentName" label="学员" width="140" />
-        <el-table-column prop="hours" label="学时" width="100">
+        <el-table-column prop="studentName" label="学员" width="120" />
+        <el-table-column prop="plateNumber" label="车牌" width="100" />
+        <el-table-column prop="vehicleType" label="车型" width="80" />
+        <el-table-column prop="hours" label="学时" width="80">
           <template #default="scope">
             {{ scope.row.hours }} h
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注">
+        <el-table-column label="时间段" width="110">
+          <template #default="scope">
+            {{ scope.row.startTime?.substring(0, 5) }} - {{ scope.row.endTime?.substring(0, 5) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注" min-width="100">
           <template #default="scope">
             {{ scope.row.remark || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="statusText" label="状态" width="100">
+        <el-table-column prop="statusText" label="状态" width="90">
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)" size="small">
               {{ scope.row.statusText }}
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160" fixed="right">
+          <template #default="scope">
+            <template v-if="scope.row.status === 1">
+              <el-button size="small" type="success" @click="handleComplete(scope.row)">完成</el-button>
+              <el-button size="small" type="danger" @click="handleNoShow(scope.row)">爽约</el-button>
+            </template>
+            <template v-else-if="scope.row.status === 2">
+              <el-button size="small" type="warning" @click="handleUndoComplete(scope.row)">撤销</el-button>
+            </template>
+            <template v-else-if="scope.row.status === 4">
+              <el-button size="small" type="primary" @click="handleUndoNoShow(scope.row)">撤销</el-button>
+            </template>
+            <span v-else style="color: rgba(255,255,255,0.5)">-</span>
           </template>
         </el-table-column>
       </el-table>
@@ -70,8 +92,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { hoursApi } from '../../api'
-import { ElMessage } from 'element-plus'
+import { hoursApi, appointmentApi } from '../../api'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
 const loading = ref(false)
@@ -87,7 +109,9 @@ const filteredRecords = computed(() => {
 })
 
 const totalHours = computed(() => {
-  return records.value.reduce((sum, record) => sum + (record.hours || 0), 0)
+  return records.value
+    .filter(r => r.status === 2)
+    .reduce((sum, record) => sum + (record.hours || 0), 0)
 })
 
 function formatDate(dateStr) {
@@ -106,10 +130,10 @@ function getStatusType(status) {
       return 'success'
     case 1:
       return 'warning'
-    case 0:
-      return 'info'
+    case 4:
+      return 'danger'
     default:
-      return ''
+      return 'info'
   }
 }
 
@@ -117,14 +141,82 @@ async function fetchRecords() {
   loading.value = true
   try {
     const res = await hoursApi.getCoachRecords()
-    if (res.code === 200) {
-      records.value = res.data || []
+    if (res.data && res.data.code === 200) {
+      records.value = res.data.data || []
     }
   } catch (error) {
     console.error('获取学时记录失败:', error)
     ElMessage.error('获取学时记录失败')
   } finally {
     loading.value = false
+  }
+}
+
+async function handleComplete(row) {
+  try {
+    await ElMessageBox.confirm('确定要完成该学员的学时吗？', '提示', { type: 'success' })
+    const res = await appointmentApi.completeAppointment(row.id)
+    if (res.data && res.data.code === 200) {
+      ElMessage.success('学时已完成')
+      fetchRecords()
+    } else {
+      ElMessage.error(res.data?.msg || '操作失败')
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+async function handleNoShow(row) {
+  try {
+    await ElMessageBox.confirm('确定要标记该学员为爽约吗？', '警告', { type: 'warning' })
+    const res = await appointmentApi.markNoShow(row.id)
+    if (res.data && res.data.code === 200) {
+      ElMessage.success('已标记为爽约')
+      fetchRecords()
+    } else {
+      ElMessage.error(res.data?.msg || '操作失败')
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+async function handleUndoComplete(row) {
+  try {
+    await ElMessageBox.confirm('确定要撤销完成状态吗？', '提示', { type: 'warning' })
+    const res = await appointmentApi.undoComplete(row.id)
+    if (res.data && res.data.code === 200) {
+      ElMessage.success('已撤销完成状态')
+      fetchRecords()
+    } else {
+      ElMessage.error(res.data?.msg || '操作失败')
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+async function handleUndoNoShow(row) {
+  try {
+    await ElMessageBox.confirm('确定要撤销爽约状态吗？', '提示', { type: 'warning' })
+    const res = await appointmentApi.undoComplete(row.id)
+    if (res.data && res.data.code === 200) {
+      ElMessage.success('已撤销爽约状态')
+      fetchRecords()
+    } else {
+      ElMessage.error(res.data?.msg || '操作失败')
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
   }
 }
 

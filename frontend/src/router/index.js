@@ -41,7 +41,7 @@ const routes = [
       { path: 'coach/schedule', name: 'coach-schedule', component: CoachSchedule, meta: { role: 'coach', title: '排班管理' } },
       { path: 'coach/confirm', name: 'coach-confirm', component: CoachConfirm, meta: { role: 'coach', title: '预约确认' } },
       { path: 'coach/appointments', name: 'coach-appointments', component: CoachAppointments, meta: { role: 'coach', title: '预约记录' } },
-      { path: 'coach/hours', name: 'coach-hours', component: CoachHours, meta: { role: 'coach', title: '学时记录' } },
+      { path: 'coach/hours', name: 'coach-hours', component: CoachHours, meta: { role: 'coach', title: '学时管理' } },
       { path: 'coach/vehicles', name: 'coach-vehicles', component: CoachVehicles, meta: { role: 'coach', title: '车辆管理' } },
       { path: 'coach/students', name: 'coach-students', component: CoachStudents, meta: { role: 'coach', title: '学员管理' } },
 

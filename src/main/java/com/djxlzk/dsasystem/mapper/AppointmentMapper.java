@@ -105,11 +105,12 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findCompletedByStudentId(@Param("studentId") Long studentId);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name " +
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +
-                        "WHERE a.coach_id = #{coachId} AND a.status = 2 " +
+                        "LEFT JOIN vehicle v ON a.vehicle_id = v.id " +
+                        "WHERE a.coach_id = #{coachId} AND a.status IN (1, 2, 4) " +
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findCompletedByCoachId(@Param("coachId") Long coachId);
 

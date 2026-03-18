@@ -15,4 +15,8 @@ public class HoursRecordDTO {
     private String remark;
     private Integer status;
     private String statusText;
+    private String startTime;
+    private String endTime;
+    private String plateNumber;
+    private String vehicleType;
 }

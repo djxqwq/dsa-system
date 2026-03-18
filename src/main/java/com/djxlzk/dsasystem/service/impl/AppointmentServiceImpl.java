@@ -273,6 +273,27 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public ResultDTO<?> undoComplete(Long id, Long coachId) {
+        Appointment appointment = appointmentMapper.selectById(id);
+        if (appointment == null) {
+            return ResultDTO.error(404, "预约记录不存在");
+        }
+
+        if (!appointment.getCoachId().equals(coachId)) {
+            return ResultDTO.error(403, "无权操作此预约");
+        }
+
+        if (appointment.getStatus() != 2 && appointment.getStatus() != 4) {
+            return ResultDTO.error(400, "只有已完成或爽约的预约才能撤销");
+        }
+
+        appointment.setStatus(1);
+        appointmentMapper.updateById(appointment);
+
+        return ResultDTO.success("已撤销", null);
+    }
+
+    @Override
     public ResultDTO<?> getStudentAppointments(Long studentId) {
         List<Appointment> appointments = appointmentMapper.findByStudentId(studentId);
         return ResultDTO.success(appointments);
@@ -365,6 +386,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         record.setCoachName(appointment.getCoachName());
         record.setRemark(appointment.getRemark());
         record.setStatus(appointment.getStatus());
+        record.setPlateNumber(appointment.getPlateNumber());
+        record.setVehicleType(appointment.getVehicleType());
+        
+        if (appointment.getStartTime() != null) {
+            record.setStartTime(appointment.getStartTime().toString());
+        }
+        if (appointment.getEndTime() != null) {
+            record.setEndTime(appointment.getEndTime().toString());
+        }
         
         long minutes = Duration.between(appointment.getStartTime(), appointment.getEndTime()).toMinutes();
         BigDecimal hours = BigDecimal.valueOf(minutes)

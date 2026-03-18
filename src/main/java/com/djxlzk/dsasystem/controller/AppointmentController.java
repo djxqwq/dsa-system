@@ -52,6 +52,12 @@ public class AppointmentController {
         return appointmentService.markNoShow(id, coachId);
     }
 
+    @PutMapping("/undo/{id}")
+    public ResultDTO<?> undoComplete(@PathVariable Long id, Authentication auth) {
+        Long coachId = (Long) auth.getPrincipal();
+        return appointmentService.undoComplete(id, coachId);
+    }
+
     @GetMapping("/student")
     public ResultDTO<?> getStudentAppointments(Authentication auth) {
         Long studentId = (Long) auth.getPrincipal();
