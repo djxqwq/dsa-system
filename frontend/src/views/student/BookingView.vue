@@ -37,7 +37,7 @@
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="开始时间">
-              <el-select v-model="form.startTime" placeholder="请先选择日期和教练" style="width: 100%" @change="onStartTimeChange">
+              <el-select v-model="form.startTime" :placeholder="form.date ? '请选择开始时间' : '请先选择日期'" style="width: 100%" @change="onStartTimeChange">
                 <el-option-group label="上午">
                   <el-option v-for="t in morningStartTimes" :key="t" :label="t" :value="t" :disabled="!isTimeAvailable(t)" />
                 </el-option-group>
@@ -187,7 +187,6 @@ for (let h = 7; h <= 18; h++) {
     allTimeSlots.push(`${String(h).padStart(2, '0')}:30`)
   }
 }
-allTimeSlots.push('18:00')
 
 const morningTimes = allTimeSlots.filter(t => {
   const h = parseInt(t.split(':')[0])
@@ -329,12 +328,13 @@ async function loadCoaches() {
   }
 }
 
-async function onDateChange() {
+async function loadAvailableSlots() {
+  if (!form.value.date) return
+  
   form.value.startTime = ''
   form.value.endTime = ''
   availableSlots.value = []
-  if (!form.value.date) return
-
+  
   try {
     const dateStr = formatDate(form.value.date)
     const coachId = form.value.coachId || null
@@ -353,6 +353,10 @@ async function onDateChange() {
   }
 }
 
+async function onDateChange() {
+  await loadAvailableSlots()
+}
+
 async function onCoachChange() {
   form.value.startTime = ''
   form.value.endTime = ''
@@ -364,7 +368,7 @@ async function onCoachChange() {
   }
   
   if (form.value.date) {
-    onDateChange()
+    await loadAvailableSlots()
   }
 }
 

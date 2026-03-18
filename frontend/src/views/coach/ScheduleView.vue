@@ -36,7 +36,7 @@
         </el-table-column>
         <el-table-column label="名额" width="100">
           <template #default="scope">
-            {{ scope.row.bookedCount }} / {{ scope.row.capacity }}
+            {{ scope.row.bookedCount || 0 }} / {{ scope.row.capacity || 3 }}
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
@@ -136,7 +136,6 @@ for (let h = 7; h <= 18; h++) {
     allTimeSlots.push(`${String(h).padStart(2, '0')}:30`)
   }
 }
-allTimeSlots.push('18:00')
 
 const morningTimes = allTimeSlots.filter(t => {
   const h = parseInt(t.split(':')[0])

@@ -143,6 +143,12 @@ public class ScheduleServiceImpl implements ScheduleService {
         List<Schedule> schedules = scheduleMapper.findByCoachIdFromDate(coachId, startDate);
 
         for (Schedule schedule : schedules) {
+            if (schedule.getCapacity() == null) {
+                schedule.setCapacity(3);
+            }
+            if (schedule.getBookedCount() == null) {
+                schedule.setBookedCount(0);
+            }
             List<String> studentNames = appointmentMapper.findStudentNamesBySchedule(
                     coachId,
                     schedule.getScheduleDate(),
