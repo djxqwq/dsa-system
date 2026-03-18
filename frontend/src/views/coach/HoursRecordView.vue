@@ -2,7 +2,7 @@
   <div class="grid">
     <div class="glass card">
       <div class="head">
-        <div class="h">学时管理</div>
+        <div class="h">学时统计</div>
         <div class="s">管理学员预约与学时记录</div>
       </div>
 
@@ -20,7 +20,7 @@
       <el-divider border-style="dashed" />
 
       <div class="table-header">
-        <span class="table-title">学时明细</span>
+        <span class="table-title">学时确认</span>
         <el-input 
           v-model="searchKeyword" 
           placeholder="搜索学员姓名" 
