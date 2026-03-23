@@ -94,13 +94,19 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "WHERE a.student_id = #{studentId} AND a.status = 2")
         BigDecimal sumCompletedHoursByStudentId(@Param("studentId") Long studentId);
 
+        @Select("SELECT COALESCE(SUM(TIMESTAMPDIFF(HOUR, a.start_time, a.end_time)), 0) " +
+                        "FROM appointment a " +
+                        "WHERE a.coach_id = #{coachId} AND a.status = 2")
+        BigDecimal sumCompletedHoursByCoachId(@Param("coachId") Long coachId);
+
         @Select("SELECT COUNT(*) FROM appointment WHERE student_id = #{studentId} AND status = 2")
         int countCompletedSessionsByStudentId(@Param("studentId") Long studentId);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name " +
+        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +
+                        "LEFT JOIN vehicle v ON a.vehicle_id = v.id " +
                         "WHERE a.student_id = #{studentId} AND a.status = 2 " +
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findCompletedByStudentId(@Param("studentId") Long studentId);

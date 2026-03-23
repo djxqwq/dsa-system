@@ -53,8 +53,19 @@
             {{ formatDate(scope.row.date) }}
           </template>
         </el-table-column>
-        <el-table-column prop="coachName" label="教练" width="120" />
-        <el-table-column prop="hours" label="学时" width="100">
+        <el-table-column label="时间段" width="140">
+          <template #default="scope">
+            {{ scope.row.startTime }} - {{ scope.row.endTime }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="coachName" label="教练" width="100" />
+        <el-table-column label="车辆" width="120">
+          <template #default="scope">
+            <span v-if="scope.row.plateNumber">{{ scope.row.plateNumber }}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="hours" label="学时" width="80">
           <template #default="scope">
             {{ scope.row.hours }} h
           </template>

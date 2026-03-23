@@ -29,11 +29,6 @@
                   <el-input v-model="profileForm.mobile" placeholder="请输入手机号" />
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :sm="12">
-                <el-form-item label="工号">
-                  <el-input v-model="profileForm.coachNo" placeholder="请输入工号" />
-                </el-form-item>
-              </el-col>
             </el-row>
 
             <div class="actions">
@@ -89,7 +84,6 @@ const saving = ref(false)
 const profileForm = reactive({
   name: '',
   mobile: '',
-  coachNo: '',
 })
 
 async function loadProfile() {
@@ -100,7 +94,6 @@ async function loadProfile() {
       const data = res.data.data
       profileForm.name = data.name || ''
       profileForm.mobile = data.mobile || ''
-      profileForm.coachNo = data.coachNo || ''
     } else {
       ElMessage.error(res.data.msg || '加载失败')
     }
@@ -129,7 +122,6 @@ async function onSaveProfile() {
     const res = await http.put('/api/user/coach/profile', {
       name: profileForm.name,
       mobile: profileForm.mobile,
-      coachNo: profileForm.coachNo,
     })
     if (res.data.code === 200) {
       ElMessage.success('保存成功')

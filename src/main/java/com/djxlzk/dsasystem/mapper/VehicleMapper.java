@@ -22,4 +22,7 @@ public interface VehicleMapper extends BaseMapper<Vehicle> {
                         "WHERE v.status = 1 AND v.vehicle_type = #{carType} " +
                         "ORDER BY v.id")
         List<Vehicle> findByCarTypeWithCoachName(@Param("carType") String carType);
+
+        @Select("SELECT COUNT(*) FROM vehicle WHERE coach_id = #{coachId} AND status = 1")
+        int countByCoachId(@Param("coachId") Long coachId);
 }

@@ -8,6 +8,7 @@ import com.djxlzk.dsasystem.dto.ResultDTO;
 import com.djxlzk.dsasystem.dto.StudentDTO;
 import com.djxlzk.dsasystem.dto.StudentProfileDTO;
 import com.djxlzk.dsasystem.entity.Student;
+import com.djxlzk.dsasystem.mapper.AppointmentMapper;
 import com.djxlzk.dsasystem.mapper.StudentMapper;
 import com.djxlzk.dsasystem.service.StudentService;
 import com.djxlzk.dsasystem.util.CaptchaStore;
@@ -27,6 +28,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     private StudentMapper studentMapper;
+
+    @Autowired
+    private AppointmentMapper appointmentMapper;
 
     @Override
     public ResultDTO<?> register(RegisterDTO registerDTO) {
@@ -227,8 +231,11 @@ public class StudentServiceImpl implements StudentService {
         data.put("id", student.getId());
         data.put("userName", student.getUserName());
         data.put("mobile", student.getMobile());
+        data.put("studentNo", student.getStudentNo());
         data.put("carType", student.getCarType());
         data.put("status", student.getStatus());
+        data.put("requiredHours", student.getRequiredHours());
+        data.put("completedHours", appointmentMapper.sumCompletedHoursByStudentId(studentId));
         return ResultDTO.success(data);
     }
 

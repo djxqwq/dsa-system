@@ -37,6 +37,14 @@
             </el-tag>
           </div>
         </div>
+        <div class="info-item">
+          <div class="info-label">已完成学时</div>
+          <div class="info-value">{{ profile.completedHours || 0 }} 小时</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">关联车辆数</div>
+          <div class="info-value">{{ profile.vehicleCount || 0 }} 辆</div>
+        </div>
       </div>
 
       <div class="tip-section">
@@ -62,6 +70,8 @@ const profile = reactive({
   mobile: '',
   coachNo: '',
   status: 1,
+  completedHours: 0,
+  vehicleCount: 0,
 })
 
 async function loadProfile() {
@@ -74,6 +84,8 @@ async function loadProfile() {
       profile.mobile = data.mobile || ''
       profile.coachNo = data.coachNo || ''
       profile.status = data.status !== undefined ? data.status : 1
+      profile.completedHours = data.completedHours || 0
+      profile.vehicleCount = data.vehicleCount || 0
     } else {
       ElMessage.error(res.data.msg || '加载失败')
     }

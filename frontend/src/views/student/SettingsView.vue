@@ -30,8 +30,8 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="12">
-                <el-form-item label="学员编号">
-                  <el-input v-model="profileForm.studentNo" placeholder="学员编号" disabled />
+                <el-form-item label="学号">
+                  <el-input v-model="profileForm.studentNo" placeholder="学号" disabled />
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="12">

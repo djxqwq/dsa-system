@@ -26,7 +26,7 @@
           <div class="info-value">{{ profile.mobile || '-' }}</div>
         </div>
         <div class="info-item">
-          <div class="info-label">学员编号</div>
+          <div class="info-label">学号</div>
           <div class="info-value">{{ profile.studentNo || '-' }}</div>
         </div>
         <div class="info-item">
