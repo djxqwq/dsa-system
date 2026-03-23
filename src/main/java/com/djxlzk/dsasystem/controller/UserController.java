@@ -152,4 +152,18 @@ public class UserController {
         Long coachId = (Long) authentication.getPrincipal();
         return coachService.updateProfile(coachId, profileDTO);
     }
+
+    /**
+     * 教练更新状态
+     * 
+     * @param status         状态值 (0-离职, 1-在职)
+     * @param authentication 认证信息
+     * @return 响应结果
+     */
+    @PutMapping("/coach/status")
+    public ResultDTO<?> updateCoachStatus(@RequestBody java.util.Map<String, Integer> body, Authentication authentication) {
+        Long coachId = (Long) authentication.getPrincipal();
+        Integer status = body.get("status");
+        return coachService.updateStatus(coachId, status);
+    }
 }

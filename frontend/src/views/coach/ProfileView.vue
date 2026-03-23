@@ -32,8 +32,8 @@
         <div class="info-item">
           <div class="info-label">状态</div>
           <div class="info-value">
-            <el-tag :type="profile.status === 1 ? 'success' : 'info'" size="small">
-              {{ profile.status === 1 ? '在职' : '离职' }}
+            <el-tag :type="profile.workStatus === 1 ? 'success' : 'warning'" size="small">
+              {{ profile.workStatus === 1 ? '在岗' : '休假' }}
             </el-tag>
           </div>
         </div>
@@ -69,7 +69,7 @@ const profile = reactive({
   name: '',
   mobile: '',
   coachNo: '',
-  status: 1,
+  workStatus: 1,
   completedHours: 0,
   vehicleCount: 0,
 })
@@ -83,7 +83,7 @@ async function loadProfile() {
       profile.name = data.name || ''
       profile.mobile = data.mobile || ''
       profile.coachNo = data.coachNo || ''
-      profile.status = data.status !== undefined ? data.status : 1
+      profile.workStatus = data.workStatus !== undefined ? data.workStatus : 1
       profile.completedHours = data.completedHours || 0
       profile.vehicleCount = data.vehicleCount || 0
     } else {

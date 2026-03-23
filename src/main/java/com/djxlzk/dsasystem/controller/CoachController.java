@@ -53,6 +53,13 @@ public class CoachController {
         return coachService.listAllCoaches();
     }
 
+    @PutMapping("/workStatus")
+    public ResultDTO<?> updateWorkStatus(@RequestBody java.util.Map<String, Object> body) {
+        Long id = Long.valueOf(body.get("id").toString());
+        Integer workStatus = Integer.valueOf(body.get("workStatus").toString());
+        return coachService.updateWorkStatus(id, workStatus);
+    }
+
     @PutMapping("/student/{studentId}/requiredHours")
     public ResultDTO<?> updateStudentRequiredHours(
             @PathVariable Long studentId,

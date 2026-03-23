@@ -28,4 +28,8 @@ public interface CoachService {
     ResultDTO<?> getProfile(Long coachId);
 
     ResultDTO<?> updateProfile(Long coachId, CoachProfileDTO profileDTO);
+
+    ResultDTO<?> updateStatus(Long coachId, Integer status);
+
+    ResultDTO<?> updateWorkStatus(Long coachId, Integer workStatus);
 }

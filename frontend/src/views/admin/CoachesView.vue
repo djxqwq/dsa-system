@@ -21,19 +21,28 @@
             {{ formatTime(scope.row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="启用状态" width="100">
           <template #default="scope">
             <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" effect="dark">
               {{ scope.row.status === 1 ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="260" fixed="right">
+        <el-table-column prop="workStatus" label="在岗状态" width="100">
+          <template #default="scope">
+            <el-tag :type="scope.row.workStatus === 1 ? 'success' : 'warning'" effect="dark">
+              {{ scope.row.workStatus === 1 ? '在岗' : '休假' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="320" fixed="right">
           <template #default="scope">
             <el-button size="small" type="primary" plain @click="openEdit(scope.row)">编辑</el-button>
             <el-button size="small" type="warning" plain @click="resetPwd(scope.row)">重置密码</el-button>
             <el-button v-if="scope.row.status === 1" size="small" type="warning" plain @click="setStatus(scope.row, 0)">停用</el-button>
             <el-button v-else size="small" type="success" plain @click="setStatus(scope.row, 1)">启用</el-button>
+            <el-button v-if="scope.row.workStatus === 1" size="small" type="warning" plain @click="setWorkStatus(scope.row, 0)">休假</el-button>
+            <el-button v-else size="small" type="success" plain @click="setWorkStatus(scope.row, 1)">在岗</el-button>
             <el-button size="small" type="danger" plain @click="remove(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -254,6 +263,31 @@ async function setStatus(row, status) {
       name: row.name,
       mobile: row.mobile,
       status
+    })
+    if (res.data.code === 200) {
+      ElMessage.success('操作成功')
+      fetch()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    const msg = e?.response?.status === 403 ? '无权限访问，请使用管理员账号重新登录'
+      : (e?.response?.data?.msg || e?.message || (e?.code === 'ERR_NETWORK' ? '无法连接后端，请确认后端已启动' : '网络错误'))
+    ElMessage.error(msg)
+  }
+}
+
+async function setWorkStatus(row, workStatus) {
+  const action = workStatus === 1 ? '在岗' : '休假'
+  try {
+    await ElMessageBox.confirm(`确定将该教练设为${action}？`, action)
+  } catch {
+    return
+  }
+  try {
+    const res = await http.put('/api/coach/workStatus', {
+      id: row.id,
+      workStatus
     })
     if (res.data.code === 200) {
       ElMessage.success('操作成功')

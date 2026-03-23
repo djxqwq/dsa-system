@@ -29,6 +29,14 @@
                   <el-input v-model="profileForm.mobile" placeholder="请输入手机号" />
                 </el-form-item>
               </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="状态">
+                  <el-select v-model="profileForm.workStatus" placeholder="请选择状态" style="width: 100%">
+                    <el-option label="在岗" :value="1" />
+                    <el-option label="休假" :value="0" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
             </el-row>
 
             <div class="actions">
@@ -84,6 +92,7 @@ const saving = ref(false)
 const profileForm = reactive({
   name: '',
   mobile: '',
+  workStatus: 1,
 })
 
 async function loadProfile() {
@@ -94,6 +103,7 @@ async function loadProfile() {
       const data = res.data.data
       profileForm.name = data.name || ''
       profileForm.mobile = data.mobile || ''
+      profileForm.workStatus = data.workStatus !== undefined ? data.workStatus : 1
     } else {
       ElMessage.error(res.data.msg || '加载失败')
     }
@@ -124,6 +134,7 @@ async function onSaveProfile() {
       mobile: profileForm.mobile,
     })
     if (res.data.code === 200) {
+      await http.put('/api/user/coach/status', { status: profileForm.workStatus })
       ElMessage.success('保存成功')
       authStore.profile.name = profileForm.name
       authStore.profile.mobile = profileForm.mobile

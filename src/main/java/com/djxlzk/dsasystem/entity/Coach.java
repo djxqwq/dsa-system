@@ -50,4 +50,9 @@ public class Coach {
      * 状态（0：禁用，1：启用）
      */
     private Integer status;
+
+    /**
+     * 在岗状态（0：休假，1：在岗）
+     */
+    private Integer workStatus;
 }

@@ -220,6 +220,7 @@ public class CoachServiceImpl implements CoachService {
         data.put("mobile", coach.getMobile());
         data.put("coachNo", coach.getCoachNo());
         data.put("status", coach.getStatus());
+        data.put("workStatus", coach.getWorkStatus());
         data.put("completedHours", appointmentMapper.sumCompletedHoursByCoachId(coachId));
         data.put("vehicleCount", vehicleMapper.countByCoachId(coachId));
         return ResultDTO.success(data);
@@ -246,5 +247,33 @@ public class CoachServiceImpl implements CoachService {
         }
         coachMapper.updateById(coach);
         return ResultDTO.success("更新成功");
+    }
+
+    @Override
+    public ResultDTO<?> updateStatus(Long coachId, Integer status) {
+        Coach coach = coachMapper.selectById(coachId);
+        if (coach == null) {
+            return ResultDTO.error(400, "教练不存在");
+        }
+        if (status == null || (status != 0 && status != 1)) {
+            return ResultDTO.error(400, "状态值无效");
+        }
+        coach.setWorkStatus(status);
+        coachMapper.updateById(coach);
+        return ResultDTO.success("状态更新成功");
+    }
+
+    @Override
+    public ResultDTO<?> updateWorkStatus(Long coachId, Integer workStatus) {
+        Coach coach = coachMapper.selectById(coachId);
+        if (coach == null) {
+            return ResultDTO.error(400, "教练不存在");
+        }
+        if (workStatus == null || (workStatus != 0 && workStatus != 1)) {
+            return ResultDTO.error(400, "在岗状态值无效");
+        }
+        coach.setWorkStatus(workStatus);
+        coachMapper.updateById(coach);
+        return ResultDTO.success("在岗状态更新成功");
     }
 }
