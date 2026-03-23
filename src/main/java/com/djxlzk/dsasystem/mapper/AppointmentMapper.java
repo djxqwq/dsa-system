@@ -23,7 +23,7 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findByStudentId(@Param("studentId") Long studentId);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
+        @Select("SELECT a.*, s.user_name as student_name, s.gender as student_gender, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +
@@ -32,7 +32,7 @@ public interface AppointmentMapper extends BaseMapper<Appointment> {
                         "ORDER BY a.appointment_date DESC, a.start_time DESC")
         List<Appointment> findByCoachId(@Param("coachId") Long coachId);
 
-        @Select("SELECT a.*, s.user_name as student_name, c.name as coach_name, v.plate_number, v.vehicle_type " +
+        @Select("SELECT a.*, s.user_name as student_name, s.gender as student_gender, c.name as coach_name, v.plate_number, v.vehicle_type " +
                         "FROM appointment a " +
                         "LEFT JOIN student s ON a.student_id = s.id " +
                         "LEFT JOIN coach c ON a.coach_id = c.id " +

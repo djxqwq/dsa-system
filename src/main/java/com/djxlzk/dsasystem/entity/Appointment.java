@@ -56,4 +56,7 @@ public class Appointment {
 
     @TableField(exist = false)
     private String vehicleType;
+
+    @TableField(exist = false)
+    private Integer studentGender;
 }

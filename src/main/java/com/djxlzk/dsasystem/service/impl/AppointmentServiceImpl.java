@@ -283,8 +283,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             return ResultDTO.error(403, "无权操作此预约");
         }
 
-        if (appointment.getStatus() != 2 && appointment.getStatus() != 4) {
-            return ResultDTO.error(400, "只有已完成或爽约的预约才能撤销");
+        if (appointment.getStatus() != 2 && appointment.getStatus() != 3 
+                && appointment.getStatus() != 4 && appointment.getStatus() != 5) {
+            return ResultDTO.error(400, "该状态不支持撤销");
         }
 
         appointment.setStatus(1);

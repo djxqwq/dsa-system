@@ -14,7 +14,6 @@ const StudentHistory = () => import('../views/student/HistoryView.vue')
 const CoachProfile = () => import('../views/coach/ProfileView.vue')
 const CoachSettings = () => import('../views/coach/SettingsView.vue')
 const CoachSchedule = () => import('../views/coach/ScheduleView.vue')
-const CoachConfirm = () => import('../views/coach/ConfirmView.vue')
 const CoachHours = () => import('../views/coach/HoursRecordView.vue')
 const CoachAppointments = () => import('../views/coach/AppointmentsView.vue')
 const CoachVehicles = () => import('../views/coach/VehiclesView.vue')
@@ -43,8 +42,7 @@ const routes = [
       { path: 'coach/settings', name: 'coach-settings', component: CoachSettings, meta: { role: 'coach', title: '设置中心' } },
       { path: 'coach/profile', name: 'coach-profile', component: CoachProfile, meta: { role: 'coach', title: '个人信息' } },
       { path: 'coach/schedule', name: 'coach-schedule', component: CoachSchedule, meta: { role: 'coach', title: '排班管理' } },
-      { path: 'coach/confirm', name: 'coach-confirm', component: CoachConfirm, meta: { role: 'coach', title: '预约确认' } },
-      { path: 'coach/appointments', name: 'coach-appointments', component: CoachAppointments, meta: { role: 'coach', title: '预约记录' } },
+      { path: 'coach/appointments', name: 'coach-appointments', component: CoachAppointments, meta: { role: 'coach', title: '预约管理' } },
       { path: 'coach/hours', name: 'coach-hours', component: CoachHours, meta: { role: 'coach', title: '学时管理' } },
       { path: 'coach/vehicles', name: 'coach-vehicles', component: CoachVehicles, meta: { role: 'coach', title: '车辆管理' } },
       { path: 'coach/students', name: 'coach-students', component: CoachStudents, meta: { role: 'coach', title: '学员管理' } },

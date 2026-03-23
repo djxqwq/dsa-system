@@ -79,8 +79,7 @@ const menus = computed(() => {
     return [
       { label: '个人信息', path: '/app/coach/profile' },
       { label: '排班管理', path: '/app/coach/schedule' },
-      { label: '预约确认', path: '/app/coach/confirm' },
-      { label: '预约记录', path: '/app/coach/appointments' },
+      { label: '预约管理', path: '/app/coach/appointments' },
       { label: '学时管理', path: '/app/coach/hours' },
       { label: '学员管理', path: '/app/coach/students' },
       { label: '车辆管理', path: '/app/coach/vehicles' },

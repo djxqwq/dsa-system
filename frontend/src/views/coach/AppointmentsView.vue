@@ -5,8 +5,8 @@
         <div class="icon-wrapper">
           <el-icon class="head-icon"><List /></el-icon>
         </div>
-        <div class="h">预约记录</div>
-        <div class="s">查看所有预约历史记录</div>
+        <div class="h">预约管理</div>
+        <div class="s">管理所有预约记录</div>
       </div>
 
       <div class="filters">
@@ -34,8 +34,15 @@
         </el-button>
       </div>
 
-      <el-table :data="appointments" style="width: 100%" class="table" v-loading="loading">
-        <el-table-column prop="studentName" label="学员" width="100" />
+      <el-table :data="pagedAppointments" style="width: 100%" class="table" v-loading="loading">
+        <el-table-column label="学员" width="120">
+          <template #default="scope">
+            {{ scope.row.studentName }}
+            <el-tag size="small" :type="scope.row.studentGender === 1 ? 'primary' : 'danger'" style="margin-left: 4px">
+              {{ scope.row.studentGender === 1 ? '男' : '女' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="appointmentDate" label="日期" width="120" />
         <el-table-column label="时间段" width="140">
           <template #default="scope">
@@ -63,24 +70,75 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80">
+        <el-table-column label="操作" width="160">
           <template #default="scope">
-            <el-button 
-              size="small" 
-              type="primary" 
-              plain 
-              @click="viewDetail(scope.row)"
-            >
-              详情
-            </el-button>
+            <div class="action-btns">
+              <template v-if="scope.row.status === 0">
+                <el-button 
+                  size="small" 
+                  type="success" 
+                  plain 
+                  @click="handleConfirm(scope.row)"
+                >
+                  确认
+                </el-button>
+                <el-button 
+                  size="small" 
+                  type="danger" 
+                  plain 
+                  @click="handleReject(scope.row)"
+                >
+                  拒绝
+                </el-button>
+              </template>
+              <template v-if="scope.row.status === 1">
+                <el-button 
+                  size="small" 
+                  type="success" 
+                  plain 
+                  @click="handleComplete(scope.row)"
+                >
+                  完成
+                </el-button>
+                <el-button 
+                  size="small" 
+                  type="warning" 
+                  plain 
+                  @click="handleNoShow(scope.row)"
+                >
+                  爽约
+                </el-button>
+              </template>
+              <template v-if="[2, 3, 4, 5].includes(scope.row.status)">
+                <el-button 
+                  size="small" 
+                  type="warning" 
+                  plain 
+                  @click="handleUndo(scope.row)"
+                >
+                  撤销
+                </el-button>
+              </template>
+            </div>
           </template>
         </el-table-column>
       </el-table>
 
-      <div class="stats" v-if="appointments.length > 0">
+      <div class="pagination-wrapper" v-if="filteredAppointments.length > 0">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50]"
+          :total="filteredAppointments.length"
+          layout="total, sizes, prev, pager, next, jumper"
+          background
+        />
+      </div>
+
+      <div class="stats" v-if="filteredAppointments.length > 0">
         <div class="stat-item">
           <span class="stat-label">总计</span>
-          <span class="stat-value">{{ appointments.length }}</span>
+          <span class="stat-value">{{ filteredAppointments.length }}</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">已完成</span>
@@ -100,44 +158,11 @@
         </div>
       </div>
     </div>
-
-    <el-dialog v-model="detailVisible" title="预约详情" width="400px">
-      <div class="detail-list" v-if="currentAppointment">
-        <div class="detail-item">
-          <span class="detail-label">学员</span>
-          <span class="detail-value">{{ currentAppointment.studentName }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">日期</span>
-          <span class="detail-value">{{ currentAppointment.appointmentDate }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">时间段</span>
-          <span class="detail-value">{{ formatTime(currentAppointment.startTime) }} - {{ formatTime(currentAppointment.endTime) }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">车辆</span>
-          <span class="detail-value">{{ currentAppointment.plateNumber || '未指定' }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">状态</span>
-          <span class="detail-value">
-            <el-tag :type="getStatusType(currentAppointment.status)" effect="dark" size="small">
-              {{ getStatusText(currentAppointment.status) }}
-            </el-tag>
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">备注</span>
-          <span class="detail-value">{{ currentAppointment.remark || '无' }}</span>
-        </div>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { List, Refresh } from '@element-plus/icons-vue'
 import { appointmentApi } from '../../api'
@@ -146,8 +171,8 @@ const appointments = ref([])
 const loading = ref(false)
 const filterStatus = ref(null)
 const filterDate = ref(null)
-const detailVisible = ref(false)
-const currentAppointment = ref(null)
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 const statusMap = {
   0: { text: '待确认', type: 'warning' },
@@ -171,6 +196,20 @@ function formatTime(time) {
   return time.substring(0, 5)
 }
 
+const filteredAppointments = computed(() => {
+  let list = appointments.value
+  if (filterDate.value) {
+    list = list.filter(a => a.appointmentDate === filterDate.value)
+  }
+  return list
+})
+
+const pagedAppointments = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredAppointments.value.slice(start, end)
+})
+
 const completedCount = computed(() => appointments.value.filter(a => a.status === 2).length)
 const cancelledCount = computed(() => appointments.value.filter(a => a.status === 3).length)
 const noShowCount = computed(() => appointments.value.filter(a => a.status === 4).length)
@@ -181,11 +220,8 @@ async function loadAppointments() {
   try {
     const res = await appointmentApi.getCoachAppointments(filterStatus.value)
     if (res.data.code === 200) {
-      let list = res.data.data || []
-      if (filterDate.value) {
-        list = list.filter(a => a.appointmentDate === filterDate.value)
-      }
-      appointments.value = list
+      appointments.value = res.data.data || []
+      currentPage.value = 1
     } else {
       ElMessage.error(res.data.msg || '加载失败')
     }
@@ -196,13 +232,82 @@ async function loadAppointments() {
   }
 }
 
-function viewDetail(row) {
-  currentAppointment.value = row
-  detailVisible.value = true
+async function handleConfirm(row) {
+  try {
+    const res = await appointmentApi.confirmAppointment(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success('预约已确认')
+      loadAppointments()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
+async function handleReject(row) {
+  try {
+    const res = await appointmentApi.rejectAppointment(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success('已拒绝该预约')
+      loadAppointments()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
+async function handleComplete(row) {
+  try {
+    const res = await appointmentApi.completeAppointment(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success('已标记为完成')
+      loadAppointments()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
+async function handleNoShow(row) {
+  try {
+    const res = await appointmentApi.markNoShow(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success('已标记为爽约')
+      loadAppointments()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
+async function handleUndo(row) {
+  try {
+    const res = await appointmentApi.undoComplete(row.id)
+    if (res.data.code === 200) {
+      ElMessage.success('已撤销完成状态')
+      loadAppointments()
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
 }
 
 onMounted(() => {
   loadAppointments()
+})
+
+watch(filterDate, () => {
+  currentPage.value = 1
 })
 </script>
 
@@ -282,6 +387,61 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination-wrapper :deep(.el-pagination) {
+  --el-pagination-bg-color: rgba(255, 255, 255, 0.15);
+  --el-pagination-button-bg-color: rgba(255, 255, 255, 0.15);
+  --el-pagination-hover-color: #409eff;
+  --el-pagination-button-color: rgba(255, 255, 255, 0.85);
+  --el-pagination-font-size: 13px;
+}
+
+.pagination-wrapper :deep(.el-pagination .el-pager li) {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.pagination-wrapper :deep(.el-pagination .el-pager li:hover) {
+  color: #409eff;
+}
+
+.pagination-wrapper :deep(.el-pagination .el-pager li.is-active) {
+  background-color: #409eff;
+  color: #fff;
+}
+
+.pagination-wrapper :deep(.el-pagination button) {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pagination-wrapper :deep(.el-pagination button:hover) {
+  color: #409eff;
+}
+
+.pagination-wrapper :deep(.el-pagination__total),
+.pagination-wrapper :deep(.el-pagination__jump) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.pagination-wrapper :deep(.el-pagination__sizes .el-select .el-select__wrapper) {
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+}
+
+.pagination-wrapper :deep(.el-pagination__editor .el-input__wrapper) {
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+}
+
 .stats {
   display: flex;
   gap: 24px;
@@ -319,26 +479,14 @@ onMounted(() => {
   color: #e6a23c;
 }
 
-.detail-list {
+.action-btns {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.detail-label {
-  color: #909399;
-  font-size: 14px;
-}
-
-.detail-value {
-  color: #303133;
-  font-size: 14px;
+.action-btns .el-button {
+  margin: 0;
 }
 
 .animate-in {
