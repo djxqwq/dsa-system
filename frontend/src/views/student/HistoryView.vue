@@ -5,7 +5,7 @@
         <div class="icon-wrapper">
           <el-icon class="head-icon"><Clock /></el-icon>
         </div>
-        <div class="h">预约历史记录</div>
+        <div class="h">预约记录</div>
         <div class="s">可筛选查看你的全部预约状态</div>
       </div>
 

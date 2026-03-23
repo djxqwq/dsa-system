@@ -6,11 +6,13 @@ const RegisterView = () => import('../views/RegisterView.vue')
 const MainLayout = () => import('../layouts/MainLayout.vue')
 
 const StudentProfile = () => import('../views/student/ProfileView.vue')
+const StudentSettings = () => import('../views/student/SettingsView.vue')
 const StudentBooking = () => import('../views/student/BookingView.vue')
 const StudentHours = () => import('../views/student/HoursView.vue')
 const StudentHistory = () => import('../views/student/HistoryView.vue')
 
 const CoachProfile = () => import('../views/coach/ProfileView.vue')
+const CoachSettings = () => import('../views/coach/SettingsView.vue')
 const CoachSchedule = () => import('../views/coach/ScheduleView.vue')
 const CoachConfirm = () => import('../views/coach/ConfirmView.vue')
 const CoachHours = () => import('../views/coach/HoursRecordView.vue')
@@ -32,11 +34,13 @@ const routes = [
     path: '/app',
     component: MainLayout,
     children: [
+      { path: 'student/settings', name: 'student-settings', component: StudentSettings, meta: { role: 'student', title: '设置中心' } },
       { path: 'student/profile', name: 'student-profile', component: StudentProfile, meta: { role: 'student', title: '个人信息' } },
       { path: 'student/booking', name: 'student-booking', component: StudentBooking, meta: { role: 'student', title: '练车预约' } },
       { path: 'student/hours', name: 'student-hours', component: StudentHours, meta: { role: 'student', title: '学时查询' } },
-      { path: 'student/history', name: 'student-history', component: StudentHistory, meta: { role: 'student', title: '预约历史' } },
+      { path: 'student/history', name: 'student-history', component: StudentHistory, meta: { role: 'student', title: '预约记录' } },
 
+      { path: 'coach/settings', name: 'coach-settings', component: CoachSettings, meta: { role: 'coach', title: '设置中心' } },
       { path: 'coach/profile', name: 'coach-profile', component: CoachProfile, meta: { role: 'coach', title: '个人信息' } },
       { path: 'coach/schedule', name: 'coach-schedule', component: CoachSchedule, meta: { role: 'coach', title: '排班管理' } },
       { path: 'coach/confirm', name: 'coach-confirm', component: CoachConfirm, meta: { role: 'coach', title: '预约确认' } },

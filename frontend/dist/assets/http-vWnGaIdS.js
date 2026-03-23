@@ -1,1 +1,0 @@
-import{a as r}from"./axios-42ANG6Sg.js";import{u as s}from"./index-CebYl0Mi.js";const o="http://localhost:8080",a=r.create({baseURL:o,timeout:15e3});a.interceptors.request.use(t=>{const e=s();return e.token&&(t.headers=t.headers||{},t.headers.Authorization=`Bearer ${e.token}`),t});export{a as h};

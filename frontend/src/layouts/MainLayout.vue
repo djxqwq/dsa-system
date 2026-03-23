@@ -84,6 +84,7 @@ const menus = computed(() => {
       { label: '学时管理', path: '/app/coach/hours' },
       { label: '学员管理', path: '/app/coach/students' },
       { label: '车辆管理', path: '/app/coach/vehicles' },
+      { label: '设置中心', path: '/app/coach/settings' },
     ]
   }
   if (auth.role === 'admin') {
@@ -99,7 +100,8 @@ const menus = computed(() => {
     { label: '个人信息', path: '/app/student/profile' },
     { label: '练车预约', path: '/app/student/booking' },
     { label: '学时查询', path: '/app/student/hours' },
-    { label: '预约历史记录', path: '/app/student/history' },
+    { label: '预约记录', path: '/app/student/history' },
+    { label: '设置中心', path: '/app/student/settings' },
   ]
 })
 
