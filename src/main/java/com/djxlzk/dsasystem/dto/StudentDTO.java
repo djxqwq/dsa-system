@@ -22,9 +22,11 @@ public class StudentDTO {
     @Size(max = 50, message = "用户名不能超过50个字符")
     private String userName;
 
-    private Integer status;
-
     private String carType;
 
+    private Integer gender;
+
     private Integer requiredHours;
+
+    private Integer status;
 }

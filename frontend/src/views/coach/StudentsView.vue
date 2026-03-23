@@ -34,6 +34,15 @@
           </template>
         </el-table-column>
         <el-table-column prop="userName" label="学员姓名" width="120" />
+        <el-table-column prop="gender" label="性别" width="80">
+          <template #default="scope">
+            <el-tag v-if="scope.row.gender !== null && scope.row.gender !== undefined" 
+                    :type="scope.row.gender === 1 ? 'primary' : 'danger'" size="small">
+              {{ scope.row.gender === 1 ? '男' : '女' }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="mobile" label="手机号" width="140" />
         <el-table-column prop="carType" label="车型" width="80">
           <template #default="scope">

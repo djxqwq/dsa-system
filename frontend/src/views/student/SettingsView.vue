@@ -30,8 +30,11 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="12">
-                <el-form-item label="学号">
-                  <el-input v-model="profileForm.studentNo" placeholder="学号" disabled />
+                <el-form-item label="性别">
+                  <el-select v-model="profileForm.gender" placeholder="请选择性别" style="width: 100%">
+                    <el-option label="男" :value="1" />
+                    <el-option label="女" :value="0" />
+                  </el-select>
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="12">
@@ -97,7 +100,7 @@ const saving = ref(false)
 const profileForm = reactive({
   name: '',
   mobile: '',
-  studentNo: '',
+  gender: 1,
   carType: 'C1',
 })
 
@@ -109,7 +112,7 @@ async function loadProfile() {
       const data = res.data.data
       profileForm.name = data.userName || ''
       profileForm.mobile = data.mobile || ''
-      profileForm.studentNo = data.studentNo || ''
+      profileForm.gender = data.gender ?? 1
       profileForm.carType = data.carType || 'C1'
     }
   } catch (error) {
@@ -139,6 +142,7 @@ async function onSaveProfile() {
       userName: profileForm.name,
       mobile: profileForm.mobile,
       carType: profileForm.carType,
+      gender: profileForm.gender,
     })
     if (res.data.code === 200) {
       ElMessage.success('保存成功')

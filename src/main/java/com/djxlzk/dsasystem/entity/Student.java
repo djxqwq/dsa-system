@@ -67,6 +67,11 @@ public class Student {
     private String carType;
 
     /**
+     * 性别（0：女，1：男）
+     */
+    private Integer gender;
+
+    /**
      * 要求学时（默认12小时）
      */
     @TableField(value = "required_hours")

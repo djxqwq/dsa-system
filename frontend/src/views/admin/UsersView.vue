@@ -24,6 +24,15 @@
           </template>
         </el-table-column>
         <el-table-column prop="userName" label="姓名" width="120" />
+        <el-table-column prop="gender" label="性别" width="80">
+          <template #default="scope">
+            <el-tag v-if="scope.row.gender !== null && scope.row.gender !== undefined" 
+                    :type="scope.row.gender === 1 ? 'primary' : 'danger'" size="small">
+              {{ scope.row.gender === 1 ? '男' : '女' }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="mobile" label="手机号" width="140" />
         <el-table-column prop="carType" label="车型" width="80">
           <template #default="scope">
@@ -43,11 +52,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="noShowCount" label="爽约" width="60" />
-        <el-table-column prop="createTime" label="创建时间" width="160">
-          <template #default="scope">
-            {{ formatTime(scope.row.createTime) }}
-          </template>
-        </el-table-column>
         <el-table-column label="操作" min-width="200" fixed="right">
           <template #default="scope">
             <el-button size="small" type="primary" plain @click="openEdit(scope.row)">编辑</el-button>
@@ -101,6 +105,12 @@
             <el-option label="C2" value="C2" />
           </el-select>
         </el-form-item>
+        <el-form-item label="性别" prop="gender">
+          <el-radio-group v-model="form.gender">
+            <el-radio :value="1">男</el-radio>
+            <el-radio :value="0">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="要求学时" prop="requiredHours">
           <el-input-number v-model="form.requiredHours" :min="0" :max="200" :step="5" style="width: 100%" />
         </el-form-item>
@@ -142,6 +152,7 @@ const form = reactive({
   mobile: '',
   password: '',
   carType: null,
+  gender: null,
   requiredHours: 12,
   status: 1
 })
@@ -206,6 +217,7 @@ function openAdd() {
   form.mobile = ''
   form.password = ''
   form.carType = null
+  form.gender = null
   form.requiredHours = 12
   form.status = 1
   dialogVisible.value = true
@@ -218,6 +230,7 @@ function openEdit(row) {
   form.mobile = row.mobile || ''
   form.password = ''
   form.carType = row.carType || null
+  form.gender = row.gender
   form.requiredHours = row.requiredHours || 12
   form.status = row.status !== undefined ? row.status : 1
   dialogVisible.value = true
@@ -239,6 +252,7 @@ async function submit() {
       userName: form.userName,
       mobile: form.mobile,
       carType: form.carType,
+      gender: form.gender,
       requiredHours: form.requiredHours,
       status: form.status
     }

@@ -30,6 +30,16 @@
           <div class="info-value">{{ profile.studentNo || '-' }}</div>
         </div>
         <div class="info-item">
+          <div class="info-label">性别</div>
+          <div class="info-value">
+            <el-tag v-if="profile.gender !== null && profile.gender !== undefined" 
+                    :type="profile.gender === 1 ? 'primary' : 'danger'" size="small">
+              {{ profile.gender === 1 ? '男' : '女' }}
+            </el-tag>
+            <span v-else>-</span>
+          </div>
+        </div>
+        <div class="info-item">
           <div class="info-label">报考车型</div>
           <div class="info-value">
             <el-tag v-if="profile.carType" type="success" size="small">{{ profile.carType }}</el-tag>
@@ -38,11 +48,7 @@
         </div>
         <div class="info-item">
           <div class="info-label">已练学时</div>
-          <div class="info-value">{{ profile.completedHours || 0 }} 小时</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">要求学时</div>
-          <div class="info-value">{{ profile.requiredHours || 0 }} 小时</div>
+          <div class="info-value">{{ profile.completedHours || 0 }} / {{ profile.requiredHours || 0 }} 小时</div>
         </div>
       </div>
 
@@ -68,6 +74,7 @@ const profile = reactive({
   name: '',
   mobile: '',
   studentNo: '',
+  gender: null,
   carType: '',
   completedHours: 0,
   requiredHours: 0,
@@ -82,6 +89,7 @@ async function loadProfile() {
       profile.name = data.userName || ''
       profile.mobile = data.mobile || ''
       profile.studentNo = data.studentNo || ''
+      profile.gender = data.gender
       profile.carType = data.carType || ''
       profile.completedHours = data.completedHours || 0
       profile.requiredHours = data.requiredHours || 0

@@ -14,4 +14,6 @@ public class StudentProfileDTO {
     private String mobile;
 
     private String carType;
+
+    private Integer gender;
 }

@@ -16,11 +16,6 @@
         <el-table-column prop="coachNo" label="工号" width="120" />
         <el-table-column prop="name" label="姓名" width="120" />
         <el-table-column prop="mobile" label="手机号" width="140" />
-        <el-table-column prop="createTime" label="创建时间" width="180">
-          <template #default="scope">
-            {{ formatTime(scope.row.createTime) }}
-          </template>
-        </el-table-column>
         <el-table-column prop="status" label="启用状态" width="100">
           <template #default="scope">
             <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" effect="dark">

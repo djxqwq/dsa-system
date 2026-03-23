@@ -176,6 +176,9 @@ public class StudentServiceImpl implements StudentService {
         if (studentDTO.getCarType() != null) {
             exist.setCarType(studentDTO.getCarType());
         }
+        if (studentDTO.getGender() != null) {
+            exist.setGender(studentDTO.getGender());
+        }
         if (studentDTO.getRequiredHours() != null) {
             exist.setRequiredHours(studentDTO.getRequiredHours());
         }
@@ -195,9 +198,9 @@ public class StudentServiceImpl implements StudentService {
         QueryWrapper<Student> wrapper = new QueryWrapper<>();
         if (StringUtils.hasText(keyword)) {
             wrapper.and(w -> w
-                .like("user_name", keyword)
-                .or().like("mobile", keyword)
-                .or().like("student_no", keyword));
+                    .like("user_name", keyword)
+                    .or().like("mobile", keyword)
+                    .or().like("student_no", keyword));
         }
         if (status != null) {
             wrapper.eq("status", status);
@@ -233,6 +236,7 @@ public class StudentServiceImpl implements StudentService {
         data.put("mobile", student.getMobile());
         data.put("studentNo", student.getStudentNo());
         data.put("carType", student.getCarType());
+        data.put("gender", student.getGender());
         data.put("status", student.getStatus());
         data.put("requiredHours", student.getRequiredHours());
         data.put("completedHours", appointmentMapper.sumCompletedHoursByStudentId(studentId));
@@ -258,6 +262,9 @@ public class StudentServiceImpl implements StudentService {
         }
         if (profileDTO.getCarType() != null) {
             student.setCarType(profileDTO.getCarType());
+        }
+        if (profileDTO.getGender() != null) {
+            student.setGender(profileDTO.getGender());
         }
         studentMapper.updateById(student);
         Map<String, Object> data = new HashMap<>();
