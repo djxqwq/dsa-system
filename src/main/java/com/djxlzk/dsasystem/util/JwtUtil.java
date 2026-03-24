@@ -93,4 +93,19 @@ public class JwtUtil {
         Claims claims = parseToken(token);
         return (String) claims.get("role");
     }
+
+    /**
+     * 从请求中获取用户ID
+     * 
+     * @param request HttpServletRequest
+     * @return 用户ID
+     */
+    public static Long getUserIdFromRequest(javax.servlet.http.HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+            return getUserIdFromToken(token);
+        }
+        return null;
+    }
 }

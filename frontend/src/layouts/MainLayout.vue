@@ -96,12 +96,13 @@ const menus = computed(() => {
     ]
   }
   return [
-    { label: '个人信息', path: '/app/student/profile' },
-    { label: '练车预约', path: '/app/student/booking' },
-    { label: '学时查询', path: '/app/student/hours' },
-    { label: '预约记录', path: '/app/student/history' },
-    { label: '设置中心', path: '/app/student/settings' },
-  ]
+      { label: '个人信息', path: '/app/student/profile' },
+      { label: '练车预约', path: '/app/student/booking' },
+      { label: '学时查询', path: '/app/student/hours' },
+      { label: '预约记录', path: '/app/student/history' },
+      { label: '消息中心', path: '/app/student/messages' },
+      { label: '设置中心', path: '/app/student/settings' },
+    ]
 })
 
 const activeMenu = computed(() => route.path)

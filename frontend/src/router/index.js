@@ -10,6 +10,7 @@ const StudentSettings = () => import('../views/student/SettingsView.vue')
 const StudentBooking = () => import('../views/student/BookingView.vue')
 const StudentHours = () => import('../views/student/HoursView.vue')
 const StudentHistory = () => import('../views/student/HistoryView.vue')
+const StudentMessages = () => import('../views/student/MessagesView.vue')
 
 const CoachProfile = () => import('../views/coach/ProfileView.vue')
 const CoachSettings = () => import('../views/coach/SettingsView.vue')
@@ -38,6 +39,7 @@ const routes = [
       { path: 'student/booking', name: 'student-booking', component: StudentBooking, meta: { role: 'student', title: '练车预约' } },
       { path: 'student/hours', name: 'student-hours', component: StudentHours, meta: { role: 'student', title: '学时查询' } },
       { path: 'student/history', name: 'student-history', component: StudentHistory, meta: { role: 'student', title: '预约记录' } },
+      { path: 'student/messages', name: 'student-messages', component: StudentMessages, meta: { role: 'student', title: '消息中心' } },
 
       { path: 'coach/settings', name: 'coach-settings', component: CoachSettings, meta: { role: 'coach', title: '设置中心' } },
       { path: 'coach/profile', name: 'coach-profile', component: CoachProfile, meta: { role: 'coach', title: '个人信息' } },
