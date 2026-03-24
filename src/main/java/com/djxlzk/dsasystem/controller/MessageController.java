@@ -20,8 +20,19 @@ public class MessageController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
-        Long studentId = JwtUtil.getUserIdFromRequest(request);
-        return ResultDTO.success(messageService.getMessagesByStudentId(studentId, page, size));
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+            String role = JwtUtil.getRoleFromToken(token);
+            Long userId = JwtUtil.getUserIdFromToken(token);
+            
+            if ("student".equals(role)) {
+                return ResultDTO.success(messageService.getMessagesByStudentId(userId, page, size));
+            } else if ("coach".equals(role)) {
+                return ResultDTO.success(messageService.getMessagesByCoachId(userId, page, size));
+            }
+        }
+        return ResultDTO.error(401, "未授权");
     }
 
     @PostMapping("/read")

@@ -24,6 +24,16 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    public Page<Message> getMessagesByCoachId(Long coachId, int page, int size) {
+        Page<Message> messagePage = new Page<>(page, size);
+        List<Message> messages = messageMapper.selectByCoachId(coachId, (page - 1) * size, size);
+        int total = messageMapper.countByCoachId(coachId);
+        messagePage.setRecords(messages);
+        messagePage.setTotal(total);
+        return messagePage;
+    }
+
+    @Override
     public boolean markAsRead(List<Long> ids) {
         String idsStr = String.join(",", ids.stream().map(String::valueOf).toArray(String[]::new));
         return messageMapper.updateReadStatus(idsStr, 1) > 0;

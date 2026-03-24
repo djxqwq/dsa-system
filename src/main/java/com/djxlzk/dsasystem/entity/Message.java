@@ -12,6 +12,7 @@ public class Message {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long studentId;
+    private Long coachId;
     private String title;
     private String content;
     private String type;

@@ -16,6 +16,12 @@ public interface MessageMapper extends BaseMapper<Message> {
     @Select("SELECT COUNT(*) FROM message WHERE student_id = #{studentId}")
     int countByStudentId(@Param("studentId") Long studentId);
 
+    @Select("SELECT * FROM message WHERE coach_id = #{coachId} ORDER BY created_at DESC LIMIT #{size} OFFSET #{page}")
+    List<Message> selectByCoachId(@Param("coachId") Long coachId, @Param("page") int page, @Param("size") int size);
+
+    @Select("SELECT COUNT(*) FROM message WHERE coach_id = #{coachId}")
+    int countByCoachId(@Param("coachId") Long coachId);
+
     @Update("UPDATE message SET `read` = #{read} WHERE id IN (${ids})")
     int updateReadStatus(@Param("ids") String ids, @Param("read") Integer read);
 }
