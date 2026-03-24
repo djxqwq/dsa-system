@@ -138,8 +138,9 @@ async function loadMessages() {
       }
     })
     if (res.data.code === 200) {
-      messages.value = res.data.data.records
-      total.value = res.data.data.total
+      // 过滤掉内容为空的消息
+      messages.value = res.data.data.records.filter(message => message.content && message.content.trim() !== '')
+      total.value = messages.value.length
     }
   } catch (error) {
     console.error('加载消息失败', error)
@@ -242,10 +243,28 @@ function formatTime(time) {
 }
 
 function simulateNewMessage() {
+  const messageContents = [
+    '您有一条新的预约提醒，请及时查看。',
+    '系统将于今晚23:00进行维护，届时可能无法访问。',
+    '您的账号已成功绑定手机号。',
+    '新功能上线：现在可以查看历史预约记录。',
+    '您的个人信息已更新成功。',
+    '学员陈明华已预约您明天上午8:00-10:00的课程。',
+    '您有3名学员需要更新学时记录。',
+    '学员王建国已取消明天下午的预约。',
+    '您的排班表已更新。',
+    '学员张丽娜已完成10小时学时。',
+    '您明天有4名学员预约练车。',
+    '新功能上线：现在可以查看学员详细信息。',
+    '学员吴鹏飞已预约您后天的课程。'
+  ]
+  
+  const randomContent = messageContents[Math.floor(Math.random() * messageContents.length)]
+  
   const newMessage = {
     id: Date.now(),
     title: '系统通知',
-    content: '您有一条新的预约提醒，请及时查看。',
+    content: randomContent,
     type: 'system',
     read: false,
     createdAt: new Date().toISOString()
