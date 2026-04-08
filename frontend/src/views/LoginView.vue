@@ -116,9 +116,9 @@
           </div>
 
           <div class="hero-footer">
-            <a href="javascript:void(0)" class="hero-link" @click="openPrivacyPolicy">Privacy Policy</a>
-            <a href="javascript:void(0)" class="hero-link" @click="openTermsOfService">Terms of Service</a>
-            <a href="javascript:void(0)" class="hero-link" @click="openContact">Contact</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openPrivacyPolicy">隐私政策</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openTermsOfService">服务条款</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openContact">联系我们</a>
           </div>
         </div>
 
@@ -250,7 +250,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog v-model="privacyPolicyVisible" title="Privacy Policy" width="600px">
+    <el-dialog v-model="privacyPolicyVisible" title="隐私政策" width="600px">
       <div class="policy-content">
         <h3>隐私政策</h3>
         <p>欢迎使用驾校练车预约数字化管理系统。我们重视您的隐私，致力于保护您的个人信息。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。</p>
@@ -293,7 +293,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog v-model="termsOfServiceVisible" title="Terms of Service" width="600px">
+    <el-dialog v-model="termsOfServiceVisible" title="服务条款" width="600px">
       <div class="policy-content">
         <h3>服务条款</h3>
         <p>欢迎使用驾校练车预约数字化管理系统。使用本系统即表示您同意遵守以下服务条款。</p>
@@ -334,7 +334,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog v-model="contactVisible" title="Contact" width="600px">
+    <el-dialog v-model="contactVisible" title="联系我们" width="600px">
       <div class="policy-content">
         <h3>联系我们</h3>
         <p>如果您有任何问题或建议，欢迎通过以下方式联系我们：</p>
