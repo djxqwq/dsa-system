@@ -347,12 +347,38 @@
         </ul>
         <h4>常见问题</h4>
         <p>如果您遇到以下问题，可以先查看我们的常见问题解答：</p>
-        <ul>
-          <li>如何重置密码？</li>
-          <li>如何预约练车？</li>
-          <li>如何查看学时记录？</li>
-          <li>如何联系教练？</li>
-        </ul>
+        <div class="faq-item">
+          <h5>如何重置密码？</h5>
+          <p>您可以在登录页面点击"忘记密码"链接，按照提示输入手机号获取验证码，然后设置新密码。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何预约练车？</h5>
+          <p>登录系统后，进入"预约练车"页面，选择可用的教练和时间段，提交预约申请即可。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何查看学时记录？</h5>
+          <p>登录系统后，进入"学时记录"页面，您可以查看所有已完成的练车学时和剩余学时。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何联系教练？</h5>
+          <p>登录系统后，进入"教练信息"页面，您可以查看教练的联系方式，也可以通过系统内的消息功能与教练沟通。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何修改个人信息？</h5>
+          <p>登录系统后，进入"个人中心"页面，点击"编辑资料"按钮，即可修改您的个人信息。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何取消预约？</h5>
+          <p>登录系统后，进入"我的预约"页面，找到要取消的预约记录，点击"取消预约"按钮即可。请注意，取消预约需要提前24小时，否则可能会影响您的信用记录。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何更换教练？</h5>
+          <p>您可以联系管理员申请更换教练，或者在系统内提交更换教练的申请，管理员会在3个工作日内处理您的请求。</p>
+        </div>
+        <div class="faq-item">
+          <h5>系统登录失败怎么办？</h5>
+          <p>请检查您的账号和密码是否正确，确保网络连接正常。如果问题仍然存在，请联系客服寻求帮助。</p>
+        </div>
         <h4>反馈建议</h4>
         <p>您的反馈对我们非常重要，我们会认真考虑每一条建议，不断改进我们的服务。</p>
       </div>
@@ -1358,5 +1384,27 @@ onBeforeUnmount(() => {
 .policy-content strong {
   color: #303133;
   font-weight: 500;
+}
+
+.faq-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+}
+
+.faq-item h5 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #303133;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.faq-item p {
+  margin-bottom: 0;
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.5;
 }
 </style>
