@@ -116,9 +116,9 @@
           </div>
 
           <div class="hero-footer">
-            <a href="#" class="hero-link">Privacy Policy</a>
-            <a href="#" class="hero-link">Terms of Service</a>
-            <a href="#" class="hero-link">Contact</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openPrivacyPolicy">Privacy Policy</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openTermsOfService">Terms of Service</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openContact">Contact</a>
           </div>
         </div>
 
@@ -250,6 +250,114 @@
       </div>
     </el-dialog>
 
+    <el-dialog v-model="privacyPolicyVisible" title="Privacy Policy" width="600px">
+      <div class="policy-content">
+        <h3>隐私政策</h3>
+        <p>欢迎使用驾校练车预约数字化管理系统。我们重视您的隐私，致力于保护您的个人信息。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。</p>
+        <h4>1. 信息收集</h4>
+        <p>我们可能收集以下信息：</p>
+        <ul>
+          <li>个人基本信息（如姓名、性别、年龄、联系方式等）</li>
+          <li>账号信息（如用户名、密码、角色等）</li>
+          <li>使用信息（如登录时间、操作记录等）</li>
+          <li>设备信息（如设备类型、操作系统版本等）</li>
+        </ul>
+        <h4>2. 信息使用</h4>
+        <p>我们收集的信息将用于：</p>
+        <ul>
+          <li>提供和改进我们的服务</li>
+          <li>验证用户身份</li>
+          <li>处理用户请求和投诉</li>
+          <li>发送相关通知和更新</li>
+          <li>分析系统使用情况</li>
+        </ul>
+        <h4>3. 信息保护</h4>
+        <p>我们采取多种安全措施保护您的个人信息，包括：</p>
+        <ul>
+          <li>数据加密</li>
+          <li>访问控制</li>
+          <li>定期安全审计</li>
+          <li>安全培训</li>
+        </ul>
+        <h4>4. 信息共享</h4>
+        <p>我们不会向第三方共享您的个人信息，除非：</p>
+        <ul>
+          <li>获得您的明确授权</li>
+          <li>法律要求</li>
+          <li>保护我们的合法权益</li>
+        </ul>
+        <h4>5. 隐私政策更新</h4>
+        <p>我们可能会不时更新本隐私政策，更新后的政策将在系统中公布。</p>
+        <h4>6. 联系我们</h4>
+        <p>如果您对本隐私政策有任何疑问，请联系我们。</p>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="termsOfServiceVisible" title="Terms of Service" width="600px">
+      <div class="policy-content">
+        <h3>服务条款</h3>
+        <p>欢迎使用驾校练车预约数字化管理系统。使用本系统即表示您同意遵守以下服务条款。</p>
+        <h4>1. 服务内容</h4>
+        <p>本系统提供以下服务：</p>
+        <ul>
+          <li>学员预约练车</li>
+          <li>教练排班管理</li>
+          <li>学时记录</li>
+          <li>消息通知</li>
+          <li>数据统计</li>
+        </ul>
+        <h4>2. 用户义务</h4>
+        <p>用户应：</p>
+        <ul>
+          <li>提供真实、准确的个人信息</li>
+          <li>妥善保管账号密码</li>
+          <li>遵守系统规则和相关法律法规</li>
+          <li>不得利用系统从事违法活动</li>
+        </ul>
+        <h4>3. 系统责任</h4>
+        <p>我们将：</p>
+        <ul>
+          <li>尽力提供稳定、安全的服务</li>
+          <li>保护用户个人信息</li>
+          <li>及时处理用户反馈</li>
+          <li>不断改进系统功能</li>
+        </ul>
+        <h4>4. 违约责任</h4>
+        <p>如用户违反本条款，我们有权：</p>
+        <ul>
+          <li>暂停或终止服务</li>
+          <li>删除相关内容</li>
+          <li>追究法律责任</li>
+        </ul>
+        <h4>5. 条款更新</h4>
+        <p>我们可能会不时更新本服务条款，更新后的条款将在系统中公布。</p>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="contactVisible" title="Contact" width="600px">
+      <div class="policy-content">
+        <h3>联系我们</h3>
+        <p>如果您有任何问题或建议，欢迎通过以下方式联系我们：</p>
+        <h4>联系方式</h4>
+        <ul>
+          <li><strong>电话：</strong>400-123-4567</li>
+          <li><strong>邮箱：</strong>support@driving-school.com</li>
+          <li><strong>地址：</strong>北京市朝阳区建国路88号</li>
+          <li><strong>工作时间：</strong>周一至周五 9:00-18:00</li>
+        </ul>
+        <h4>常见问题</h4>
+        <p>如果您遇到以下问题，可以先查看我们的常见问题解答：</p>
+        <ul>
+          <li>如何重置密码？</li>
+          <li>如何预约练车？</li>
+          <li>如何查看学时记录？</li>
+          <li>如何联系教练？</li>
+        </ul>
+        <h4>反馈建议</h4>
+        <p>您的反馈对我们非常重要，我们会认真考虑每一条建议，不断改进我们的服务。</p>
+      </div>
+    </el-dialog>
+
     <div class="bg-grid"></div>
   </div>
 </template>
@@ -274,6 +382,9 @@ const devCoachLoginLoading = ref(false)
 
 const studentDialogVisible = ref(false)
 const coachDialogVisible = ref(false)
+const privacyPolicyVisible = ref(false)
+const termsOfServiceVisible = ref(false)
+const contactVisible = ref(false)
 const studentList = ref([])
 const coachList = ref([])
 const studentListLoading = ref(false)
@@ -445,6 +556,18 @@ watch(
 
 function goRegister() {
   router.replace({ name: 'register' })
+}
+
+function openPrivacyPolicy() {
+  privacyPolicyVisible.value = true
+}
+
+function openTermsOfService() {
+  termsOfServiceVisible.value = true
+}
+
+function openContact() {
+  contactVisible.value = true
 }
 
 async function refreshCaptcha() {
@@ -1191,5 +1314,49 @@ onBeforeUnmount(() => {
   background: #f0f2f5;
   padding: 2px 6px;
   border-radius: 4px;
+}
+
+.policy-content {
+  max-height: 400px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.policy-content h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #303133;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.policy-content h4 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #409eff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.policy-content p {
+  margin-bottom: 12px;
+  color: #606266;
+  font-size: 14px;
+}
+
+.policy-content ul {
+  margin-bottom: 16px;
+  padding-left: 20px;
+}
+
+.policy-content li {
+  margin-bottom: 6px;
+  color: #606266;
+  font-size: 14px;
+}
+
+.policy-content strong {
+  color: #303133;
+  font-weight: 500;
 }
 </style>
