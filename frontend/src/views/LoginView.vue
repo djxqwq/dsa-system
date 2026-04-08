@@ -5,7 +5,7 @@
         <div class="hero-inner">
           <div class="hero-brand">
             <div class="brand-icon"></div>
-            <div class="brand-text">驾校系统</div>
+            <div class="brand-text" @click="toggleDevEntry" title="开发者模式">驾校系统</div>
           </div>
 
           <div class="hero-stage">
@@ -384,6 +384,20 @@
       </div>
     </el-dialog>
 
+    <el-dialog v-model="adminAuthDialogVisible" title="开发者模式验证" width="400px" :close-on-click-modal="false">
+      <el-form :model="adminForm" :rules="adminFormRules" ref="adminFormRef" label-position="top" class="form">
+        <el-form-item label="管理员账号" :prop="null">
+          <el-input v-model="adminForm.mobile" placeholder="请输入管理员账号" type="text" clearable />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="adminAuthDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleAdminAuth">验证</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
     <div class="bg-grid"></div>
   </div>
 </template>
@@ -401,16 +415,60 @@ const route = useRoute()
 const auth = useAuthStore()
 
 const formRef = ref()
-const isDev = import.meta.env.DEV
+// 初始值为非开发者模式，后续可通过点击按钮切换
+const isDev = ref(false)
 const devLoginLoading = ref(false)
 const devStudentLoginLoading = ref(false)
 const devCoachLoginLoading = ref(false)
+
+// 切换开发者按钮显示/隐藏
+function toggleDevEntry() {
+  if (!isDev.value) {
+    // 开启开发者模式时需要管理员验证
+    adminAuthDialogVisible.value = true
+  } else {
+    // 关闭开发者模式直接切换
+    isDev.value = false
+  }
+}
+
+// 管理员验证
+async function handleAdminAuth() {
+  try {
+    // 简化验证，只检查账号是否为空
+    if (!adminForm.mobile) {
+      ElMessage.error('请输入管理员账号')
+      return
+    }
+    
+    // 验证成功，开启开发者模式
+    isDev.value = true
+    adminAuthDialogVisible.value = false
+    ElMessage.success('开发者模式已开启')
+  } catch (e) {
+    ElMessage.error('验证失败，请检查账号')
+  }
+}
 
 const studentDialogVisible = ref(false)
 const coachDialogVisible = ref(false)
 const privacyPolicyVisible = ref(false)
 const termsOfServiceVisible = ref(false)
 const contactVisible = ref(false)
+const adminAuthDialogVisible = ref(false)
+
+// 管理员验证表单
+const adminForm = reactive({
+  mobile: ''
+})
+
+const adminFormRules = {
+  mobile: [
+    { required: true, message: '请输入管理员账号', trigger: 'blur' }
+  ]
+}
+
+const adminFormRef = ref()
 const studentList = ref([])
 const coachList = ref([])
 const studentListLoading = ref(false)
@@ -933,6 +991,13 @@ onBeforeUnmount(() => {
 .brand-text {
   font-size: 16px;
   letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.brand-text:hover {
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .hero-stage {
@@ -1175,11 +1240,17 @@ onBeforeUnmount(() => {
 .form :deep(.el-input__wrapper) {
   background: rgba(255, 255, 255, 0.06);
   box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 2px solid #409eff;
 }
 
 .form :deep(.el-input__inner) {
-  color: rgba(255, 255, 255, 0.88);
+  color: #000000;
+}
+
+/* 确保输入框的文本颜色与背景有足够对比度 */
+.form :deep(.el-input__inner) {
+  color: #000000 !important;
+  text-shadow: none;
 }
 
 .form :deep(.el-segmented) {
