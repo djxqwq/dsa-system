@@ -342,7 +342,7 @@
         <ul>
           <li><strong>电话：</strong>400-123-4567</li>
           <li><strong>邮箱：</strong>support@driving-school.com</li>
-          <li><strong>地址：</strong>北京市朝阳区建国路88号</li>
+          <li><strong>地址：</strong>浙江省杭州市西湖区成蹊苑</li>
           <li><strong>工作时间：</strong>周一至周五 9:00-18:00</li>
         </ul>
         <h4>常见问题</h4>
