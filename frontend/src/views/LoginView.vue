@@ -384,16 +384,26 @@
       </div>
     </el-dialog>
 
-    <el-dialog v-model="adminAuthDialogVisible" title="开发者模式验证" width="400px" :close-on-click-modal="false">
-      <el-form :model="adminForm" :rules="adminFormRules" ref="adminFormRef" label-position="top" class="form">
-        <el-form-item label="管理员账号" :prop="null">
-          <el-input v-model="adminForm.mobile" placeholder="请输入管理员账号" type="text" clearable />
-        </el-form-item>
-      </el-form>
+    <el-dialog v-model="adminAuthDialogVisible" title="开发者模式验证" width="450px" :close-on-click-modal="false" custom-class="admin-auth-dialog">
+      <div class="admin-auth-content">
+        <div class="admin-auth-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 8v4l3 3"></path>
+          </svg>
+        </div>
+        <div class="admin-auth-title">请输入管理员账号</div>
+        <div class="admin-auth-desc">只有管理员才能开启开发者模式</div>
+        <el-form :model="adminForm" :rules="adminFormRules" ref="adminFormRef" label-position="top" class="admin-auth-form">
+          <el-form-item :prop="null">
+            <el-input v-model="adminForm.mobile" placeholder="请输入管理员账号" type="text" clearable class="admin-auth-input" />
+          </el-form-item>
+        </el-form>
+      </div>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="adminAuthDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleAdminAuth">验证</el-button>
+          <el-button class="admin-auth-btn admin-auth-btn-cancel" @click="adminAuthDialogVisible = false">取消</el-button>
+          <el-button type="primary" class="admin-auth-btn admin-auth-btn-confirm" @click="handleAdminAuth">验证</el-button>
         </span>
       </template>
     </el-dialog>
@@ -415,8 +425,8 @@ const route = useRoute()
 const auth = useAuthStore()
 
 const formRef = ref()
-// 初始值为非开发者模式，后续可通过点击按钮切换
-const isDev = ref(false)
+// 从localStorage读取开发者模式状态，默认为false
+const isDev = ref(localStorage.getItem('isDev') === 'true')
 const devLoginLoading = ref(false)
 const devStudentLoginLoading = ref(false)
 const devCoachLoginLoading = ref(false)
@@ -429,6 +439,8 @@ function toggleDevEntry() {
   } else {
     // 关闭开发者模式直接切换
     isDev.value = false
+    // 保存状态到localStorage
+    localStorage.setItem('isDev', 'false')
   }
 }
 
@@ -443,6 +455,8 @@ async function handleAdminAuth() {
     
     // 验证成功，开启开发者模式
     isDev.value = true
+    // 保存状态到localStorage
+    localStorage.setItem('isDev', 'true')
     adminAuthDialogVisible.value = false
     ElMessage.success('开发者模式已开启')
   } catch (e) {
@@ -1244,13 +1258,15 @@ onBeforeUnmount(() => {
 }
 
 .form :deep(.el-input__inner) {
-  color: #000000;
+  color: #000000 !important;
+  text-shadow: none !important;
+  caret-color: #000000 !important;
 }
 
-/* 确保输入框的文本颜色与背景有足够对比度 */
-.form :deep(.el-input__inner) {
+/* 确保输入框获得焦点时光标颜色也是黑色 */
+.form :deep(.el-input__inner:focus) {
   color: #000000 !important;
-  text-shadow: none;
+  caret-color: #000000 !important;
 }
 
 .form :deep(.el-segmented) {
@@ -1467,9 +1483,106 @@ onBeforeUnmount(() => {
 .faq-item h5 {
   margin-top: 0;
   margin-bottom: 8px;
+}
+
+/* 开发者模式验证弹窗样式 */
+.admin-auth-dialog {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.admin-auth-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.admin-auth-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #409eff, #69c0ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+.admin-auth-icon .icon {
+  color: white;
+  width: 40px;
+  height: 40px;
+}
+
+.admin-auth-title {
+  font-size: 18px;
+  font-weight: 600;
   color: #303133;
+  margin-bottom: 8px;
+}
+
+.admin-auth-desc {
   font-size: 14px;
-  font-weight: 500;
+  color: #909399;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.admin-auth-form {
+  width: 100%;
+  max-width: 320px;
+}
+
+.admin-auth-input {
+  border-radius: 8px !important;
+  height: 44px;
+  font-size: 14px;
+}
+
+.admin-auth-input .el-input__wrapper {
+  border-radius: 8px;
+  border: 2px solid #dcdfe6;
+  transition: all 0.3s ease;
+}
+
+.admin-auth-input .el-input__wrapper:hover {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.admin-auth-input .el-input__wrapper.is-focus {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.admin-auth-btn {
+  padding: 0 24px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.admin-auth-btn-cancel {
+  margin-right: 12px;
+}
+
+.admin-auth-btn-confirm {
+  background: #409eff;
+  border-color: #409eff;
+}
+
+.admin-auth-btn-confirm:hover {
+  background: #66b1ff;
+  border-color: #66b1ff;
+}
+
+/* 确保输入框的文本颜色与光标颜色 */
+.admin-auth-input .el-input__inner {
+  color: #303133 !important;
+  caret-color: #303133 !important;
 }
 
 .faq-item p {
