@@ -1228,6 +1228,7 @@ onBeforeUnmount(() => {
   padding: 22px;
   position: relative;
   z-index: 2;
+  min-height: 579px;
 }
 
 .header {
