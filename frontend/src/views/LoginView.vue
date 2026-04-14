@@ -4,7 +4,7 @@
       <div class="hero" aria-hidden="true">
         <div class="hero-inner">
           <div class="hero-brand">
-            <div class="brand-icon"></div>
+            <img class="brand-icon" :src="logo" alt="驾校系统logo" />
             <div class="brand-text" @click="toggleDevEntry" title="开发者模式">驾校系统</div>
           </div>
 
@@ -419,6 +419,7 @@ import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import http from '../api/http'
+import logo from '../assets/驾校logo设计1.png'
 
 const router = useRouter()
 const route = useRoute()
@@ -998,8 +999,7 @@ onBeforeUnmount(() => {
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(8px);
+  object-fit: cover;
 }
 
 .brand-text {
