@@ -1228,7 +1228,7 @@ onBeforeUnmount(() => {
   padding: 22px;
   position: relative;
   z-index: 2;
-  min-height: 579px;
+  min-height: 580px;
 }
 
 .header {
@@ -1285,9 +1285,11 @@ onBeforeUnmount(() => {
 }
 
 .dev-entry {
-  margin-top: 12px;
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 12px;
   padding-top: 12px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.14);
 }
 
 .dev-row {
