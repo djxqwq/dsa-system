@@ -30,6 +30,9 @@ jobs:
       working-directory: ./frontend
       run: |
         echo "VITE_API_BASE=${{ secrets.VITE_API_BASE }}" > .env.production
+        echo "=== VITE_API_BASE value ==="
+        cat .env.production
+        echo "=== End ==="
         npm run build
 
     - name: Deploy to GitHub Pages
