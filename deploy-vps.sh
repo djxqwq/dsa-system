@@ -15,12 +15,17 @@ cd frontend
 npm install
 npm run build
 
-# 3. 重启后端
+# 3. 复制前端文件到 web 目录
+echo "复制前端文件..."
+mkdir -p /var/www/dsa-system
+cp -r ~/dsa-system/frontend/dist/* /var/www/dsa-system/
+
+# 4. 重启后端
 echo "重启后端..."
 cd ~/dsa-system
 ./restart-app.sh
 
-# 4. 重启 Nginx
+# 5. 重启 Nginx
 echo "重启 Nginx..."
 systemctl reload nginx
 
