@@ -20,7 +20,9 @@ jobs:
         cache: maven
 
     - name: Build Backend with Maven
-      run: ./mvnw clean package -DskipTests
+      run: |
+        chmod +x ./mvnw
+        ./mvnw clean package -DskipTests
 
     - name: Setup SSH
       run: |
