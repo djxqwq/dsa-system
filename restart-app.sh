@@ -2,6 +2,9 @@
 
 # 驾校管理系统后端重启脚本
 
+# 加载环境变量
+source /etc/profile.d/dsa-system.sh
+
 APP_NAME="dsa-system"
 JAR_FILE="dsa-system-0.0.1-SNAPSHOT.jar"
 APP_DIR="$HOME/dsa-system"
