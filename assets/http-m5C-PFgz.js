@@ -1,0 +1,1 @@
+import{a as r}from"./axios-42ANG6Sg.js";import{u as s}from"./index-vISsXH5e.js";const a="http://147.182.207.24:8080",o=r.create({baseURL:a,timeout:15e3});o.interceptors.request.use(e=>{const t=s();return t.token&&(e.headers=e.headers||{},e.headers.Authorization=`Bearer ${t.token}`),e});export{o as h};
