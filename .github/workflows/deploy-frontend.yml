@@ -28,9 +28,9 @@ jobs:
 
     - name: Build
       working-directory: ./frontend
-      run: npm run build
-      env:
-        VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+      run: |
+        echo "VITE_API_BASE=${{ secrets.VITE_API_BASE }}" > .env.production
+        npm run build
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
