@@ -4,8 +4,8 @@
       <div class="hero" aria-hidden="true">
         <div class="hero-inner">
           <div class="hero-brand">
-            <div class="brand-icon"></div>
-            <div class="brand-text">驾校系统</div>
+            <img class="brand-icon" :src="logo" alt="驾校系统logo" />
+            <div class="brand-text" @click="toggleDevEntry" title="开发者模式">驾校系统</div>
           </div>
 
           <div class="hero-stage">
@@ -116,9 +116,9 @@
           </div>
 
           <div class="hero-footer">
-            <a href="#" class="hero-link">Privacy Policy</a>
-            <a href="#" class="hero-link">Terms of Service</a>
-            <a href="#" class="hero-link">Contact</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openPrivacyPolicy">隐私政策</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openTermsOfService">服务条款</a>
+            <a href="javascript:void(0)" class="hero-link" @click="openContact">联系我们</a>
           </div>
         </div>
 
@@ -250,6 +250,164 @@
       </div>
     </el-dialog>
 
+    <el-dialog v-model="privacyPolicyVisible" title="隐私政策" width="600px">
+      <div class="policy-content">
+        <h3>隐私政策</h3>
+        <p>欢迎使用驾校练车预约数字化管理系统。我们重视您的隐私，致力于保护您的个人信息。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。</p>
+        <h4>1. 信息收集</h4>
+        <p>我们可能收集以下信息：</p>
+        <ul>
+          <li>个人基本信息（如姓名、性别、年龄、联系方式等）</li>
+          <li>账号信息（如用户名、密码、角色等）</li>
+          <li>使用信息（如登录时间、操作记录等）</li>
+          <li>设备信息（如设备类型、操作系统版本等）</li>
+        </ul>
+        <h4>2. 信息使用</h4>
+        <p>我们收集的信息将用于：</p>
+        <ul>
+          <li>提供和改进我们的服务</li>
+          <li>验证用户身份</li>
+          <li>处理用户请求和投诉</li>
+          <li>发送相关通知和更新</li>
+          <li>分析系统使用情况</li>
+        </ul>
+        <h4>3. 信息保护</h4>
+        <p>我们采取多种安全措施保护您的个人信息，包括：</p>
+        <ul>
+          <li>数据加密</li>
+          <li>访问控制</li>
+          <li>定期安全审计</li>
+          <li>安全培训</li>
+        </ul>
+        <h4>4. 信息共享</h4>
+        <p>我们不会向第三方共享您的个人信息，除非：</p>
+        <ul>
+          <li>获得您的明确授权</li>
+          <li>法律要求</li>
+          <li>保护我们的合法权益</li>
+        </ul>
+        <h4>5. 隐私政策更新</h4>
+        <p>我们可能会不时更新本隐私政策，更新后的政策将在系统中公布。</p>
+        <h4>6. 联系我们</h4>
+        <p>如果您对本隐私政策有任何疑问，请联系我们。</p>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="termsOfServiceVisible" title="服务条款" width="600px">
+      <div class="policy-content">
+        <h3>服务条款</h3>
+        <p>欢迎使用驾校练车预约数字化管理系统。使用本系统即表示您同意遵守以下服务条款。</p>
+        <h4>1. 服务内容</h4>
+        <p>本系统提供以下服务：</p>
+        <ul>
+          <li>学员预约练车</li>
+          <li>教练排班管理</li>
+          <li>学时记录</li>
+          <li>消息通知</li>
+          <li>数据统计</li>
+        </ul>
+        <h4>2. 用户义务</h4>
+        <p>用户应：</p>
+        <ul>
+          <li>提供真实、准确的个人信息</li>
+          <li>妥善保管账号密码</li>
+          <li>遵守系统规则和相关法律法规</li>
+          <li>不得利用系统从事违法活动</li>
+        </ul>
+        <h4>3. 系统责任</h4>
+        <p>我们将：</p>
+        <ul>
+          <li>尽力提供稳定、安全的服务</li>
+          <li>保护用户个人信息</li>
+          <li>及时处理用户反馈</li>
+          <li>不断改进系统功能</li>
+        </ul>
+        <h4>4. 违约责任</h4>
+        <p>如用户违反本条款，我们有权：</p>
+        <ul>
+          <li>暂停或终止服务</li>
+          <li>删除相关内容</li>
+          <li>追究法律责任</li>
+        </ul>
+        <h4>5. 条款更新</h4>
+        <p>我们可能会不时更新本服务条款，更新后的条款将在系统中公布。</p>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="contactVisible" title="联系我们" width="600px">
+      <div class="policy-content">
+        <h3>联系我们</h3>
+        <p>如果您有任何问题或建议，欢迎通过以下方式联系我们：</p>
+        <h4>联系方式</h4>
+        <ul>
+          <li><strong>电话：</strong>400-123-4567</li>
+          <li><strong>邮箱：</strong>support@driving-school.com</li>
+          <li><strong>地址：</strong>浙江省杭州市钱塘区下沙高教园东区学林街280号成蹊苑</li>
+          <li><strong>工作时间：</strong>周一至周五 9:00-18:00</li>
+        </ul>
+        <h4>常见问题</h4>
+        <p>如果您遇到以下问题，可以先查看我们的常见问题解答：</p>
+        <div class="faq-item">
+          <h5>如何重置密码？</h5>
+          <p>您可以在登录页面点击"忘记密码"链接，按照提示输入手机号获取验证码，然后设置新密码。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何预约练车？</h5>
+          <p>登录系统后，进入"预约练车"页面，选择可用的教练和时间段，提交预约申请即可。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何查看学时记录？</h5>
+          <p>登录系统后，进入"学时记录"页面，您可以查看所有已完成的练车学时和剩余学时。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何联系教练？</h5>
+          <p>登录系统后，进入"教练信息"页面，您可以查看教练的联系方式，也可以通过系统内的消息功能与教练沟通。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何修改个人信息？</h5>
+          <p>登录系统后，进入"个人中心"页面，点击"编辑资料"按钮，即可修改您的个人信息。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何取消预约？</h5>
+          <p>登录系统后，进入"我的预约"页面，找到要取消的预约记录，点击"取消预约"按钮即可。请注意，取消预约需要提前24小时，否则可能会影响您的信用记录。</p>
+        </div>
+        <div class="faq-item">
+          <h5>如何更换教练？</h5>
+          <p>您可以联系管理员申请更换教练，或者在系统内提交更换教练的申请，管理员会在3个工作日内处理您的请求。</p>
+        </div>
+        <div class="faq-item">
+          <h5>系统登录失败怎么办？</h5>
+          <p>请检查您的账号和密码是否正确，确保网络连接正常。如果问题仍然存在，请联系客服寻求帮助。</p>
+        </div>
+        <h4>反馈建议</h4>
+        <p>您的反馈对我们非常重要，我们会认真考虑每一条建议，不断改进我们的服务。</p>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="adminAuthDialogVisible" title="开发者模式验证" width="450px" :close-on-click-modal="false" custom-class="admin-auth-dialog">
+      <div class="admin-auth-content">
+        <div class="admin-auth-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 8v4l3 3"></path>
+          </svg>
+        </div>
+        <div class="admin-auth-title">请输入管理员账号</div>
+        <div class="admin-auth-desc">只有管理员才能开启开发者模式</div>
+        <el-form :model="adminForm" :rules="adminFormRules" ref="adminFormRef" label-position="top" class="admin-auth-form">
+          <el-form-item :prop="null">
+            <el-input v-model="adminForm.mobile" placeholder="请输入管理员账号" type="text" clearable class="admin-auth-input" />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button class="admin-auth-btn admin-auth-btn-cancel" @click="adminAuthDialogVisible = false">取消</el-button>
+          <el-button type="primary" class="admin-auth-btn admin-auth-btn-confirm" @click="handleAdminAuth">验证</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
     <div class="bg-grid"></div>
   </div>
 </template>
@@ -261,19 +419,71 @@ import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import http from '../api/http'
+import logo from '../assets/驾校logo设计1.png'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 
 const formRef = ref()
-const isDev = import.meta.env.DEV
+// 从localStorage读取开发者模式状态，默认为false
+const isDev = ref(localStorage.getItem('isDev') === 'true')
 const devLoginLoading = ref(false)
 const devStudentLoginLoading = ref(false)
 const devCoachLoginLoading = ref(false)
 
+// 切换开发者按钮显示/隐藏
+function toggleDevEntry() {
+  if (!isDev.value) {
+    // 开启开发者模式时需要管理员验证
+    adminAuthDialogVisible.value = true
+  } else {
+    // 关闭开发者模式直接切换
+    isDev.value = false
+    // 保存状态到localStorage
+    localStorage.setItem('isDev', 'false')
+  }
+}
+
+// 管理员验证
+async function handleAdminAuth() {
+  try {
+    // 简化验证，只检查账号是否为空
+    if (!adminForm.mobile) {
+      ElMessage.error('请输入管理员账号')
+      return
+    }
+    
+    // 验证成功，开启开发者模式
+    isDev.value = true
+    // 保存状态到localStorage
+    localStorage.setItem('isDev', 'true')
+    adminAuthDialogVisible.value = false
+    ElMessage.success('开发者模式已开启')
+  } catch (e) {
+    ElMessage.error('验证失败，请检查账号')
+  }
+}
+
 const studentDialogVisible = ref(false)
 const coachDialogVisible = ref(false)
+const privacyPolicyVisible = ref(false)
+const termsOfServiceVisible = ref(false)
+const contactVisible = ref(false)
+const adminAuthDialogVisible = ref(false)
+
+// 管理员验证表单
+const adminForm = reactive({
+  mobile: ''
+})
+
+const adminFormRules = {
+  mobile: [
+    { required: true, message: '请输入管理员账号', trigger: 'blur' }
+  ]
+}
+
+const adminFormRef = ref()
 const studentList = ref([])
 const coachList = ref([])
 const studentListLoading = ref(false)
@@ -445,6 +655,18 @@ watch(
 
 function goRegister() {
   router.replace({ name: 'register' })
+}
+
+function openPrivacyPolicy() {
+  privacyPolicyVisible.value = true
+}
+
+function openTermsOfService() {
+  termsOfServiceVisible.value = true
+}
+
+function openContact() {
+  contactVisible.value = true
 }
 
 async function refreshCaptcha() {
@@ -777,13 +999,19 @@ onBeforeUnmount(() => {
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(8px);
+  object-fit: cover;
 }
 
 .brand-text {
   font-size: 16px;
   letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.brand-text:hover {
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .hero-stage {
@@ -1000,6 +1228,7 @@ onBeforeUnmount(() => {
   padding: 22px;
   position: relative;
   z-index: 2;
+  min-height: 580px;
 }
 
 .header {
@@ -1026,11 +1255,19 @@ onBeforeUnmount(() => {
 .form :deep(.el-input__wrapper) {
   background: rgba(255, 255, 255, 0.06);
   box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 2px solid #409eff;
 }
 
 .form :deep(.el-input__inner) {
-  color: rgba(255, 255, 255, 0.88);
+  color: #000000 !important;
+  text-shadow: none !important;
+  caret-color: #000000 !important;
+}
+
+/* 确保输入框获得焦点时光标颜色也是黑色 */
+.form :deep(.el-input__inner:focus) {
+  color: #000000 !important;
+  caret-color: #000000 !important;
 }
 
 .form :deep(.el-segmented) {
@@ -1048,9 +1285,11 @@ onBeforeUnmount(() => {
 }
 
 .dev-entry {
-  margin-top: 12px;
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 12px;
   padding-top: 12px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.14);
 }
 
 .dev-row {
@@ -1191,5 +1430,168 @@ onBeforeUnmount(() => {
   background: #f0f2f5;
   padding: 2px 6px;
   border-radius: 4px;
+}
+
+.policy-content {
+  max-height: 400px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.policy-content h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #303133;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.policy-content h4 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #409eff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.policy-content p {
+  margin-bottom: 12px;
+  color: #606266;
+  font-size: 14px;
+}
+
+.policy-content ul {
+  margin-bottom: 16px;
+  padding-left: 20px;
+}
+
+.policy-content li {
+  margin-bottom: 6px;
+  color: #606266;
+  font-size: 14px;
+}
+
+.policy-content strong {
+  color: #303133;
+  font-weight: 500;
+}
+
+.faq-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+}
+
+.faq-item h5 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/* 开发者模式验证弹窗样式 */
+.admin-auth-dialog {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.admin-auth-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.admin-auth-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #409eff, #69c0ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+.admin-auth-icon .icon {
+  color: white;
+  width: 40px;
+  height: 40px;
+}
+
+.admin-auth-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 8px;
+}
+
+.admin-auth-desc {
+  font-size: 14px;
+  color: #909399;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.admin-auth-form {
+  width: 100%;
+  max-width: 320px;
+}
+
+.admin-auth-input {
+  border-radius: 8px !important;
+  height: 44px;
+  font-size: 14px;
+}
+
+.admin-auth-input .el-input__wrapper {
+  border-radius: 8px;
+  border: 2px solid #dcdfe6;
+  transition: all 0.3s ease;
+}
+
+.admin-auth-input .el-input__wrapper:hover {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.admin-auth-input .el-input__wrapper.is-focus {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.admin-auth-btn {
+  padding: 0 24px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.admin-auth-btn-cancel {
+  margin-right: 12px;
+}
+
+.admin-auth-btn-confirm {
+  background: #409eff;
+  border-color: #409eff;
+}
+
+.admin-auth-btn-confirm:hover {
+  background: #66b1ff;
+  border-color: #66b1ff;
+}
+
+/* 确保输入框的文本颜色与光标颜色 */
+.admin-auth-input .el-input__inner {
+  color: #303133 !important;
+  caret-color: #303133 !important;
+}
+
+.faq-item p {
+  margin-bottom: 0;
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.5;
 }
 </style>
