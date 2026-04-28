@@ -49,4 +49,9 @@ public class AdminServiceImpl implements AdminService {
     public Admin getById(Long id) {
         return adminMapper.selectById(id);
     }
+
+    @Override
+    public boolean existsByMobile(String mobile) {
+        return adminMapper.selectByMobile(mobile) != null;
+    }
 }

@@ -167,6 +167,19 @@ public class DevAdminController {
         }
     }
 
+    @GetMapping("/admin/check-mobile")
+    public ResultDTO<?> checkAdminMobile(@RequestParam String mobile) {
+        if (mobile == null || mobile.trim().isEmpty()) {
+            return ResultDTO.error(400, "请输入管理员账号");
+        }
+        boolean exists = adminMapper.selectByMobile(mobile) != null;
+        if (exists) {
+            return ResultDTO.success("验证成功", null);
+        } else {
+            return ResultDTO.error(400, "管理员账号不存在");
+        }
+    }
+
     @PostMapping("/coach/dev-login")
     public ResultDTO<?> devCoachLogin(@RequestBody(required = false) Map<String, Object> body) {
         try {

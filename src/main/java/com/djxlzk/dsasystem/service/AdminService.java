@@ -9,4 +9,6 @@ public interface AdminService {
     ResultDTO<?> login(AdminLoginDTO loginDTO);
 
     Admin getById(Long id);
+
+    boolean existsByMobile(String mobile);
 }

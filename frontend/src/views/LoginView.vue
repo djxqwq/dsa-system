@@ -448,20 +448,28 @@ function toggleDevEntry() {
 // 管理员验证
 async function handleAdminAuth() {
   try {
-    // 简化验证，只检查账号是否为空
     if (!adminForm.mobile) {
       ElMessage.error('请输入管理员账号')
       return
     }
     
-    // 验证成功，开启开发者模式
+    const res = await http.get('/api/user/admin/check-mobile', { params: { mobile: adminForm.mobile } })
+    const code = res?.data?.code
+    const ok = code === 200 || code === '200'
+    
+    if (!ok) {
+      const msg = res?.data?.msg || '验证失败，请检查账号'
+      ElMessage.error(msg)
+      return
+    }
+    
     isDev.value = true
-    // 保存状态到localStorage
     localStorage.setItem('isDev', 'true')
     adminAuthDialogVisible.value = false
     ElMessage.success('开发者模式已开启')
   } catch (e) {
-    ElMessage.error('验证失败，请检查账号')
+    const msg = e?.response?.data?.msg || '验证失败，请检查账号'
+    ElMessage.error(msg)
   }
 }
 
