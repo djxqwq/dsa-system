@@ -1267,15 +1267,14 @@ onBeforeUnmount(() => {
 }
 
 .form :deep(.el-input__inner) {
-  color: #000000 !important;
+  color: #ffffff !important;
   text-shadow: none !important;
-  caret-color: #000000 !important;
+  caret-color: #ffffff !important;
 }
 
-/* 确保输入框获得焦点时光标颜色也是黑色 */
 .form :deep(.el-input__inner:focus) {
-  color: #000000 !important;
-  caret-color: #000000 !important;
+  color: #ffffff !important;
+  caret-color: #ffffff !important;
 }
 
 .form :deep(.el-segmented) {
