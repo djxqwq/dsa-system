@@ -122,6 +122,13 @@ public class StudentServiceImpl implements StudentService {
         if (studentMapper.selectCount(wrapper) > 0) {
             return ResultDTO.error(400, "该手机号已存在");
         }
+        if (StringUtils.hasText(studentDTO.getStudentNo())) {
+            wrapper.clear();
+            wrapper.eq("student_no", studentDTO.getStudentNo());
+            if (studentMapper.selectCount(wrapper) > 0) {
+                return ResultDTO.error(400, "该学号已存在");
+            }
+        }
         Student student = new Student();
         BeanUtils.copyProperties(studentDTO, student);
         student.setCreateTime(LocalDateTime.now());
@@ -165,6 +172,13 @@ public class StudentServiceImpl implements StudentService {
             w.eq("mobile", studentDTO.getMobile());
             if (studentMapper.selectCount(w) > 0) {
                 return ResultDTO.error(400, "该手机号已被使用");
+            }
+        }
+        if (StringUtils.hasText(studentDTO.getStudentNo()) && !studentDTO.getStudentNo().equals(exist.getStudentNo())) {
+            QueryWrapper<Student> w = new QueryWrapper<>();
+            w.eq("student_no", studentDTO.getStudentNo());
+            if (studentMapper.selectCount(w) > 0) {
+                return ResultDTO.error(400, "该学号已被使用");
             }
         }
         exist.setUserName(studentDTO.getUserName() != null ? studentDTO.getUserName() : exist.getUserName());
