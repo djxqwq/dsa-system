@@ -1,0 +1,36 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build Backend with Maven
+      run: |
+        chmod +x ./mvnw
+        ./mvnw clean package -DskipTests
+
+    - name: Install sshpass
+      run: sudo apt-get install -y sshpass
+
+    - name: Upload JAR to VPS
+      run: |
+        echo "${{ secrets.VPS_PASSWORD }}" | sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no target/dsa-system-0.0.1-SNAPSHOT.jar ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:~/dsa-system/
+
+    - name: Deploy to VPS
+      run: |
+        echo "${{ secrets.VPS_PASSWORD }}" | sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "cd ~/dsa-system && ./deploy-vps.sh"

@@ -28,7 +28,7 @@ const AdminStats = () => import('../views/admin/StatsView.vue')
 const AdminSettings = () => import('../views/admin/SettingsView.vue')
 
 const routes = [
-  { path: '/', redirect: '/login' },
+  { path: '/', name: 'root', component: LoginView, meta: { public: true } },
   { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
   { path: '/register', name: 'register', component: RegisterView, meta: { public: true } },
   {
