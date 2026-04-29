@@ -7,7 +7,8 @@ echo "开始部署到 VPS..."
 # 1. 拉取最新代码
 echo "拉取最新代码..."
 cd ~/dsa-system
-git reset --hard HEAD
+git fetch --all
+git reset --hard origin/master
 git clean -fd
 git pull origin master
 
