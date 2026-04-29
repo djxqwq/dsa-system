@@ -27,13 +27,6 @@ jobs:
     - name: Install sshpass
       run: sudo apt-get install -y sshpass
 
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
-
     - name: Upload JAR to VPS
       run: |
         echo "${{ secrets.VPS_PASSWORD }}" | sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no target/dsa-system-0.0.1-SNAPSHOT.jar ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:~/dsa-system/

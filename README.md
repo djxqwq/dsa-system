@@ -1,6 +1,6 @@
 # DSA System - 驾校练车预约数字化管理系统
 
-<http://147.182.207.24>
+**在线演示地址：http://147.182.207.24**
 
 ## 项目简介
 
@@ -150,7 +150,8 @@ dsa-system/
 
 - JDK 17 或更高版本
 - Node.js 16+
-- MySQL 8.0
+- MySQL 8.0（本地开发）
+- TiDB Cloud（生产环境）
 - Maven 3.6+
 
 ### 后端启动
@@ -165,10 +166,18 @@ cd dsa-system
 1. 配置数据库连接（修改 `src/main/resources/application.properties`）
 
 ```properties
+# 本地开发使用本地 MySQL
 spring.datasource.url=jdbc:mysql://localhost:3306/driving_school_db
 spring.datasource.username=your_username
 spring.datasource.password=your_password
+
+# 生产环境使用环境变量
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/driving_school_db}
+spring.datasource.username=${DB_USERNAME:your_username}
+spring.datasource.password=${DB_PASSWORD:your_password}
 ```
+
+**注意**：生产环境使用 TiDB Cloud 云数据库，请勿在代码中硬编码数据库凭证。
 
 1. 初始化数据库
 
@@ -204,7 +213,9 @@ npm run dev
 
 ## 构建部署
 
-### 后端构建
+### 本地开发部署
+
+#### 后端构建
 
 ```bash
 mvn clean package
@@ -212,7 +223,7 @@ mvn clean package
 
 生成的JAR包位于 `target/` 目录下
 
-### 前端构建
+#### 前端构建
 
 ```bash
 cd frontend
@@ -220,6 +231,58 @@ npm run build
 ```
 
 构建产物位于 `frontend/dist/` 目录下
+
+### VPS 自动部署
+
+本项目已配置 GitHub Actions 自动部署到 VPS，支持热部署：
+
+#### 部署架构
+
+- **前端**：Nginx 静态文件服务
+- **后端**：Spring Boot JAR 包运行
+- **数据库**：TiDB Cloud 云数据库
+- **部署方式**：GitHub Actions CI/CD
+
+#### 自动部署流程
+
+1. 推送代码到 GitHub master 分支
+2. GitHub Actions 自动触发构建
+3. 构建后端 JAR 包并上传到 VPS
+4. VPS 执行部署脚本：
+   - 拉取最新代码
+   - 构建前端
+   - 复制前端文件到 Nginx 目录
+   - 重启后端服务
+   - 重载 Nginx
+
+#### 部署脚本
+
+- `deploy-vps.sh` - VPS 部署脚本
+- `restart-app.sh` - 后端重启脚本
+- `dsa-system-nginx.conf` - Nginx 配置文件
+
+#### GitHub Secrets 配置
+
+需要在 GitHub 仓库设置中配置以下 Secrets：
+
+- `VPS_IP` - VPS IP 地址
+- `VPS_USER` - VPS 用户名
+- `VPS_PASSWORD` - VPS 密码
+
+#### 手动部署
+
+如需手动部署到 VPS：
+
+```bash
+# 1. 构建后端
+./mvnw clean package -DskipTests
+
+# 2. 上传 JAR 到 VPS
+scp target/dsa-system-0.0.1-SNAPSHOT.jar root@147.182.207.24:~/dsa-system/
+
+# 3. SSH 连接到 VPS 执行部署
+ssh root@147.182.207.24 "cd ~/dsa-system && ./deploy-vps.sh"
+```
 
 ## API接口说明
 
