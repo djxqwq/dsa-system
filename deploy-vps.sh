@@ -27,6 +27,7 @@ cp -r ~/dsa-system/frontend/dist/* /var/www/dsa-system/
 # 4. 重启后端
 echo "重启后端..."
 cd ~/dsa-system
+pkill -f dsa-system
 chmod +x ./restart-app.sh
 ./restart-app.sh
 
