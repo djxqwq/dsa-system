@@ -36,6 +36,13 @@ if [ -f $JAR_FILE ]; then
     cp $JAR_FILE $BACKUP_FILE
 fi
 
+# 检查JAR文件完整性
+echo "Checking JAR file integrity..."
+if ! file $JAR_FILE | grep -q "Java archive"; then
+    echo "ERROR: JAR file is corrupted or not a valid Java archive"
+    exit 1
+fi
+
 # 启动新的应用
 echo "Starting new application..."
 nohup java -jar $JAR_FILE > $LOG_FILE 2>&1 &
@@ -50,8 +57,21 @@ echo "Log file: $LOG_FILE"
 # 等待几秒检查应用是否成功启动
 sleep 10
 if ps -p $NEW_PID > /dev/null; then
-    echo "Application is running successfully!"
+    echo "Application process is running..."
+    
+    # 检查端口是否监听
+    sleep 5
+    if ss -tlnp | grep -q ":8082.*java"; then
+        echo "Application is running successfully and listening on port 8082!"
+    else
+        echo "WARNING: Application process is running but not listening on port 8082"
+        echo "Last 10 lines of log:"
+        tail -10 $LOG_FILE
+        exit 1
+    fi
 else
     echo "ERROR: Application failed to start. Check log file: $LOG_FILE"
+    echo "Last 10 lines of log:"
+    tail -10 $LOG_FILE
     exit 1
 fi

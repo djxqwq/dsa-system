@@ -30,6 +30,10 @@ jobs:
     - name: Upload JAR to VPS
       run: |
         echo "${{ secrets.VPS_PASSWORD }}" | sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no target/dsa-system-0.0.1-SNAPSHOT.jar ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:~/dsa-system/
+        
+    - name: Verify JAR File Integrity
+      run: |
+        echo "${{ secrets.VPS_PASSWORD }}" | sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "cd ~/dsa-system && echo 'Checking JAR file integrity...' && ls -la dsa-system-0.0.1-SNAPSHOT.jar && file dsa-system-0.0.1-SNAPSHOT.jar"
 
     - name: Deploy to VPS
       run: |
